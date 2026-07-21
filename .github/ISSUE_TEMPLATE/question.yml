@@ -1,0 +1,41 @@
+name: Pregunta o apoyo de uso
+description: Solicite orientación sobre Cafetal OS sin publicar datos reales de una finca.
+title: "[Pregunta]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por usar Cafetal OS. No incluya contraseñas, respaldos, nombres de trabajadores, teléfonos, coordenadas precisas ni información comercial privada.
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      placeholder: 2.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Perfil
+      options:
+        - Productor o administrador de finca
+        - Técnico o agrónomo
+        - Catador o comprador
+        - Desarrollador
+        - Estudiante o formador
+        - Otro
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Pregunta
+      description: Explique el objetivo y qué ha intentado.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto ficticio o anonimizado
+      description: Use datos demo o ejemplos que no identifiquen una operación real.

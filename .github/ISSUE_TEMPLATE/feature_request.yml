@@ -1,0 +1,26 @@
+name: Proponer una mejora
+description: Proponer una función con valor claro para la operación cafetalera.
+title: "[Mejora]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema de campo
+      description: Explique quién lo enfrenta y en qué momento del proceso.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Flujo propuesto
+      description: Describa entradas, acciones y resultado esperado.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Beneficio esperado
+      description: Tiempo, calidad, trazabilidad, costo o sostenibilidad.
+    validations:
+      required: true

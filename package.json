@@ -1,0 +1,168 @@
+{
+  "name": "cafetal-os",
+  "version": "2.2.1",
+  "private": false,
+  "description": "Sistema open source, offline-first y multiplataforma para la gestión integral de fincas cafetaleras.",
+  "main": "./out/main/index.js",
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "Comunidad Cafetal OS",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "demo": "electron-vite dev -- --demo --reset-demo",
+    "demo:preview": "electron-vite preview -- --demo --reset-demo",
+    "demo:generate": "node scripts/generate_demo_data.js --years 5",
+    "build": "npm run test && npm run lint && npm run build:app",
+    "build:win": "npm run build && electron-builder --win nsis portable",
+    "build:mac": "npm run build && electron-builder --mac dmg zip",
+    "build:linux": "npm run build && electron-builder --linux AppImage deb",
+    "pack": "npm run build && electron-builder --dir",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "npm run build:app && npm run screenshots:preflight && node ./node_modules/@playwright/test/cli.js test tests/e2e/electron.spec.js --config=playwright.config.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "verify": "node scripts/verify-project.js",
+    "demo:reset": "npm run demo:generate && npm run demo",
+    "db:template": "node scripts/create_empty_database.js",
+    "screenshots": "npm run screenshots:prepare && npm run screenshots:run",
+    "screenshots:ui": "npm run screenshots:prepare && node ./node_modules/@playwright/test/cli.js test tests/e2e/screenshots.spec.js --config=playwright.config.js --ui",
+    "verify:bundle": "node scripts/verify-bundle.js",
+    "build:app": "npm run clean:build && electron-vite build && npm run verify:bundle",
+    "screenshots:prepare": "npm run clean:screenshots && npm run demo:generate && npm run build:app && npm run screenshots:preflight",
+    "screenshots:desktop": "npm run screenshots",
+    "screenshots:mobile": "npm run screenshots",
+    "screenshots:preflight": "node scripts/check-electron.js",
+    "screenshots:run": "node ./node_modules/@playwright/test/cli.js test tests/e2e/screenshots.spec.js --config=playwright.config.js",
+    "screenshots:debug": "npm run screenshots:prepare && node ./node_modules/@playwright/test/cli.js test tests/e2e/screenshots.spec.js --config=playwright.config.js --debug",
+    "capturas": "npm run screenshots",
+    "clean:build": "node scripts/clean-generated.js out",
+    "clean:screenshots": "node scripts/clean-generated.js test-results playwright-report .tmp/screenshots-user-data",
+    "security:audit": "npm audit --audit-level=moderate"
+  },
+  "dependencies": {
+    "@lucide/vue": "1.25.0",
+    "chart.js": "4.5.0",
+    "exceljs": "4.4.0",
+    "pdfkit": "0.18.0",
+    "qrcode": "1.5.4",
+    "sql.js": "1.13.0",
+    "vue": "3.5.40"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@playwright/test": "1.61.1",
+    "@swc/core": "1.15.11",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vitest/coverage-v8": "4.1.10",
+    "@vue/test-utils": "2.4.11",
+    "electron": "43.1.1",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "eslint": "9.39.2",
+    "eslint-plugin-vue": "10.8.0",
+    "jsdom": "28.0.0",
+    "prettier": "3.8.2",
+    "vite": "7.3.6",
+    "vitest": "4.1.10"
+  },
+  "build": {
+    "appId": "hn.cafetalos.community",
+    "productName": "Cafetal OS",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "database",
+        "to": "database",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "docs",
+        "to": "docs",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "README.md",
+        "to": "README.md"
+      },
+      {
+        "from": "CONTRIBUTING.md",
+        "to": "CONTRIBUTING.md"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "build",
+        "to": "build",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "IMG",
+        "to": "IMG",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "language": "Spanish",
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.business",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+      "icon": "build/icon.png"
+    },
+    "executableName": "cafetal-os"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
+}

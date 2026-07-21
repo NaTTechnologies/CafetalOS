@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: Cafetal OS
+message: Si utiliza Cafetal OS en investigación, capacitación o proyectos comunitarios, cite el proyecto y la versión utilizada.
+type: software
+version: 2.2.1
+license: MIT
+abstract: Sistema open source, offline-first y multiplataforma para la gestión integral de fincas cafetaleras.
+authors:
+  - name: Comunidad Cafetal OS
+keywords:
+  - coffee
+  - agriculture
+  - farm-management
+  - electron
+  - vue
+  - honduras
