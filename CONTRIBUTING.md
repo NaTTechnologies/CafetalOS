@@ -172,3 +172,100 @@ Para errores de capturas, adjunte `test-results/.../error-context.md` y el conte
 ## Reconocimiento
 
 Las contribuciones aceptadas pueden aparecer en notas de versión y documentación comunitaria. No se exige cesión de derechos adicional: cada contribución se publica bajo la licencia del repositorio.
+
+## Contribuciones al servidor MCP
+
+El MCP local es una frontera de seguridad y de compatibilidad. Una nueva tool debe:
+
+1. resolver una necesidad de dominio concreta, no exponer SQL libre;
+2. tener un nombre estable con prefijo `cafetal_`;
+3. definir `inputSchema` cerrado con `additionalProperties: false`;
+4. devolver JSON estructurado y comprensible;
+5. operar en solo lectura salvo que exista una justificación explícita;
+6. validar referencias, fechas, rangos y permisos antes de escribir;
+7. incluir prueba unitaria y actualización de `docs/MCP_IA_LOCAL.md`;
+8. evitar acceso a usuarios, contraseñas, tokens o archivos ajenos a la finca.
+
+Para comprobar el servidor:
+
+```bash
+npm run build:app
+npm run mcp:inspect
+```
+
+No escriba mensajes de diagnóstico en `stdout`: el transporte stdio reserva ese canal para JSON-RPC. Use `stderr`.
+
+## Contribuciones a formularios inteligentes
+
+Una mejora de formulario debe reducir errores o ayudar a tomar una decisión. No agregue campos únicamente porque existan columnas en la base.
+
+Para cada flujo considere:
+
+- datos mínimos para completar la tarea;
+- valores que pueden calcularse automáticamente;
+- reglas cruzadas entre campos;
+- advertencias que no deben bloquear el registro;
+- errores objetivos que sí deben impedir persistencia;
+- mensajes naturales para una persona cafetalera;
+- validación equivalente en `src/main/domain-validation.js`.
+
+Los rangos agronómicos deben documentar su origen o declararse configurables. Evite presentar una recomendación orientativa como diagnóstico profesional.
+
+## Contribuciones a reportes PDF
+
+Los reportes deben respetar la identidad configurada, márgenes imprimibles, numeración y legibilidad en tamaño carta. Al modificar el generador:
+
+- pruebe documentos de una y varias páginas;
+- pruebe con y sin logotipo;
+- pruebe textos largos, caracteres españoles y listas;
+- no inserte rutas locales ni datos técnicos en el contenido visible;
+- conserve metadatos y pie institucional;
+- genere el PDF de prueba desde **Configuración → Reportes y membrete**.
+
+## Contribuciones a planillas de corte
+
+La planilla semanal representa una práctica de campo, no una hoja contable genérica. Una modificación debe preservar:
+
+- fila por cortador;
+- columna por día y fecha;
+- lote y semana únicos;
+- unidad original y conversión a kg;
+- precio, total y pago;
+- actualización sin duplicados;
+- transacción completa.
+
+Incluya casos de cinco, seis y siete días, una persona sin corte, valores cero y edición de una semana existente.
+
+## Contribuciones a registro masivo
+
+Una entidad nueva debe publicar solo los campos necesarios. Debe incluir:
+
+1. definición visual y listas relacionadas;
+2. normalización y validación de dominio;
+3. validación de relaciones;
+4. detección de duplicados dentro del bloque;
+5. persistencia transaccional;
+6. prueba de rollback;
+7. documentación de efectos derivados.
+
+No implemente “guardar filas válidas e ignorar errores” como comportamiento predeterminado: puede producir bloques incompletos difíciles de auditar.
+
+## Contribuciones a compras y acopio
+
+Las propuestas deben distinguir:
+
+- proveedor comercial;
+- origen físico;
+- estado del café;
+- peso y unidad comercial;
+- control de humedad/defectos;
+- decisión de calidad;
+- inventario resultante;
+- transformación posterior;
+- costo de origen.
+
+No reutilice el lote agronómico como lote físico sin documentar la razón. La ruta futura es separar lotes de recepción, transformación y venta.
+
+## Contribuciones educativas
+
+Una lección debe incluir audiencia, objetivo, contenido práctico, fuente y evaluación. El lenguaje debe ser claro para productores y trabajadores, y cualquier recomendación técnica debe diferenciar orientación general de una exigencia legal, contractual o agronómica.

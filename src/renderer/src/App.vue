@@ -16,7 +16,7 @@ const currentPage = ref(readStored('cafetalos.currentPage', 'appcafe.currentPage
 const sidebarCollapsed = ref(readStored('cafetalos.sidebar.collapsed', 'appcafe.sidebar.collapsed', 'false') === 'true')
 const mobileSidebarOpen = ref(false)
 const isMobile = ref(window.innerWidth <= MOBILE_BREAKPOINT)
-const appInfo = ref({ version: '2.2.1', mode: 'production', databasePath: '' })
+const appInfo = ref({ version: '2.6.0', mode: 'production', databasePath: '' })
 const currentUser = ref(null)
 const authReady = ref(false)
 const pageMeta = computed(() => getNavigationItem(currentPage.value))

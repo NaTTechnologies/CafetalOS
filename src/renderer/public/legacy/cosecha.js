@@ -5,6 +5,11 @@ const Cosecha = {
 
     async cargar(container) {
         try {
+            const appInfo = await window.api.app.getInfo();
+            if (appInfo?.mode === 'demo' && this.fechaActual === Utils.hoy()) {
+                const latestDate = await window.api.cosecha.getLatestDate();
+                if (latestDate) this.fechaActual = latestDate;
+            }
             const lotes = await window.api.lotes.getAll();
             const recolectores = await window.api.recolectores.getAll();
             const cortesHoy = await window.api.cosecha.getByDate(this.fechaActual);
@@ -63,7 +68,7 @@ const Cosecha = {
                                     </thead>
                                     <tbody>
                                         ${cortesHoy.length === 0 ?
-                                            '<tr><td colspan="9" class="text-center" style="padding:30px;color:var(--cafe-400);">No hay cortes registrados hoy.</td></tr>' :
+                                            '<tr><td colspan="9" class="text-center" style="padding:30px;color:var(--cafe-400);">No hay cortes registrados para la fecha seleccionada.</td></tr>' :
                                             cortesHoy.map(c => `
                                                 <tr>
                                                     <td>${Utils.escapar(c.lote_codigo)}</td>

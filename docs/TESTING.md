@@ -1,64 +1,141 @@
 # Estrategia de pruebas
 
-## Capas
+Cafetal OS combina pruebas unitarias, integridad de base, contrato IPC, compilación y recorridos Electron con Playwright.
 
-1. **Unidad:** formatters, navegación, validadores y almacén de autenticación.
-2. **Componentes:** renderizado Vue con `@vue/test-utils`.
-3. **Contrato:** API expuesta por preload y limpieza de listeners.
-4. **Integridad de datos:** demo completa, producción limpia y continuidad de trazabilidad.
-5. **E2E:** login, dashboard, búsqueda, scroll independiente, configuración y navegación con Playwright Electron.
-6. **Documentación visual:** captura reproducible de todas las interfaces en `IMG/`.
-
-## Ejecutar
+## Comandos
 
 ```bash
 npm test
-npm run test:watch
 npm run test:coverage
+npm run lint
+npm run verify
+npm run build:app
 npm run test:e2e
+npm run screenshots
+npm run mcp:inspect
+```
+
+## Capas
+
+### Dominio
+
+`tests/unit/domain-validation.spec.js` cubre:
+
+- lotes, área y fechas;
+- cosecha y pagos;
+- beneficio y rendimiento;
+- inventario y ventas;
+- gastos;
+- proveedores y compras;
+- conversiones kg/qq;
+- humedad y advertencias;
+- temporadas.
+
+### Flujos masivos
+
+`tests/unit/bulk-workflows.spec.js` verifica:
+
+- entidades permitidas;
+- presencia de campos relacionados;
+- transacción y rollback;
+- protección contra duplicados;
+- existencia proyectada;
+- compra masiva e inventario derivado.
+
+### Demo e integridad
+
+`tests/unit/demo-integrity.spec.js` comprueba que:
+
+- producción esté vacía;
+- demo contenga módulos principales;
+- existan temporadas, planillas, proveedores y compras;
+- educación tenga progreso;
+- la cadena de trazabilidad sea continua;
+- no existan datos reales identificables.
+
+### Preload e IPC
+
+`tests/unit/preload-contract.spec.js` valida que el renderer reciba métodos explícitos para:
+
+- temporadas y planillas;
+- proveedores y compras;
+- actualización de calidad;
+- registro masivo;
+- progreso educativo;
+- configuración y MCP.
+
+### Navegación y responsive
+
+Las pruebas incluyen búsqueda, módulo Compras, drawer móvil, backdrop, autenticación accesible y ayuda/educación responsive.
+
+### MCP
+
+`tests/unit/mcp-server.spec.js` valida la publicación de 14 tools de lectura, tools de escritura opcionales, recursos y esquemas cerrados.
+
+## Playwright Electron
+
+### Prueba de humo
+
+```bash
+npm run test:e2e
+```
+
+Comprueba inicio, login, navegación y cierre.
+
+### Galería
+
+```bash
 npm run screenshots
 ```
 
-## Pruebas de autenticación
+Captura:
 
-`auth-store.spec.js` comprueba:
+- módulos desktop y móvil;
+- configuración;
+- planilla semanal;
+- registro masivo de lotes;
+- compras masivas;
+- ayuda y educación responsive.
 
-- creación de la cuenta inicial;
-- autenticación de `admin`;
-- ausencia de contraseñas en texto plano;
-- creación de múltiples usuarios;
-- protección del último administrador activo.
+Playwright usa un perfil temporal en `.tmp/screenshots-user-data`. Los resultados de error quedan en `test-results/` y `playwright-report/`.
 
-Las pruebas E2E usan `--user-data-path=<temporal>` para no tocar datos reales ni credenciales existentes.
+## Datos de prueba
 
-## Prueba de demo
+- Use `database/cafetal-os-demo.db`.
+- No use respaldos reales.
+- Los códigos demo deben conservar prefijo o contexto ficticio.
+- Correos de ejemplo deben usar dominios reservados como `.example`.
 
-`demo-integrity.spec.js` comprueba:
+## Criterios para una contribución
 
-- operación principal con volumen suficiente;
-- datos en todos los módulos complementarios;
-- separación entre plantilla productiva y demo;
-- continuidad de `hash_anterior` en la cadena de trazabilidad.
+| Cambio | Evidencia mínima |
+|---|---|
+| Regla de cálculo | Prueba unitaria. |
+| Nueva tabla | Migración, demo e integridad. |
+| Canal IPC | Handler, preload y prueba de contrato. |
+| Registro masivo | Validación, rollback y caso derivado. |
+| Planilla de corte | creación, actualización, ceros y totales. |
+| Compra/acopio | calidad, inventario y doble procesamiento. |
+| Componente Vue | Vue Test Utils y accesibilidad. |
+| Cambio visual | capturas desktop/móvil. |
+| Tool MCP | esquema cerrado, handler y prueba. |
 
-## Scroll y navegación
+## Diagnóstico
 
-La prueba E2E confirma que:
+### Electron ausente
 
-- el panel central puede desplazarse en Beneficio;
-- el sidebar conserva su contenedor de scroll;
-- la búsqueda abre el módulo seleccionado;
-- Configuración expone controles de demo y usuarios.
+```bash
+npx install-electron --no
+node scripts/check-electron.js
+```
 
-## Capturas
+### Captura intermitente
 
-`tests/e2e/screenshots.spec.js` genera una captura `fullPage` del login, todos los módulos y cada pestaña de Configuración. Consulte [CAPTURAS_PLAYWRIGHT.md](CAPTURAS_PLAYWRIGHT.md).
+```bash
+npm run screenshots:debug
+npx playwright show-trace test-results/<caso>/trace.zip
+```
 
-## Criterio mínimo para pull requests
+### Dependencias
 
-- Todas las pruebas pasan.
-- No se reduce cobertura de lógica modificada.
-- Un cambio de interfaz incluye prueba de componente o E2E.
-- Un cambio visual significativo regenera `IMG/`.
-- Un canal IPC nuevo incluye prueba de contrato y autenticación.
-- Un cambio de esquema incluye prueba sobre una base existente y otra nueva.
-- Los fixtures no contienen información real.
+Use `npm ci`, no `npm install`, en CI y releases para respetar `package-lock.json`.

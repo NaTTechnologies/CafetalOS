@@ -36,8 +36,19 @@ contextBridge.exposeInMainWorld('api', {
         create: (data) => ipcRenderer.invoke('recolectores:create', data),
         getRanking: (fi, ff, limite) => ipcRenderer.invoke('recolectores:getRanking', fi, ff, limite)
     },
+    temporadas: {
+        getAll: () => ipcRenderer.invoke('temporadas:getAll'),
+        create: (data) => ipcRenderer.invoke('temporadas:create', data)
+    },
+    planillas: {
+        getWeek: (options) => ipcRenderer.invoke('planillas:getWeek', options),
+        list: () => ipcRenderer.invoke('planillas:list'),
+        getProfitability: (limit) => ipcRenderer.invoke('planillas:getProfitability', limit),
+        saveWeek: (payload) => ipcRenderer.invoke('planillas:saveWeek', payload)
+    },
     // Cosecha
     cosecha: {
+        getLatestDate: () => ipcRenderer.invoke('cosecha:getLatestDate'),
         getByDate: (fecha) => ipcRenderer.invoke('cosecha:getByDate', fecha),
         getByLote: (lote_id) => ipcRenderer.invoke('cosecha:getByLote', lote_id),
         create: (data) => ipcRenderer.invoke('cosecha:create', data),
@@ -45,6 +56,23 @@ contextBridge.exposeInMainWorld('api', {
         getResumen: (fi, ff) => ipcRenderer.invoke('cosecha:getResumen', fi, ff),
         getLastDays: (days) => ipcRenderer.invoke('cosecha:getLastDays', days),
         getResumenPorPeriodo: (fi, ff) => ipcRenderer.invoke('cosecha:getResumenPorPeriodo', fi, ff)
+    },
+    proveedoresCafe: {
+        getAll: () => ipcRenderer.invoke('proveedoresCafe:getAll'),
+        create: (data) => ipcRenderer.invoke('proveedoresCafe:create', data)
+    },
+    comprasCafe: {
+        getAll: (filters) => ipcRenderer.invoke('comprasCafe:getAll', filters),
+        getSummary: () => ipcRenderer.invoke('comprasCafe:getSummary'),
+        nextCode: () => ipcRenderer.invoke('comprasCafe:nextCode'),
+        create: (data) => ipcRenderer.invoke('comprasCafe:create', data),
+        setStatus: (id, status) => ipcRenderer.invoke('comprasCafe:setStatus', id, status),
+        updateQuality: (id, data) => ipcRenderer.invoke('comprasCafe:updateQuality', id, data),
+        sendToBenefit: (id, data) => ipcRenderer.invoke('comprasCafe:sendToBenefit', id, data)
+    },
+    bulk: {
+        validate: (entity, rows) => ipcRenderer.invoke('bulk:validate', entity, rows),
+        save: (entity, rows) => ipcRenderer.invoke('bulk:save', entity, rows)
     },
     // Beneficio
     beneficio: {
@@ -57,8 +85,18 @@ contextBridge.exposeInMainWorld('api', {
     inventario: {
         getResumen: () => ipcRenderer.invoke('inventario:getResumen'),
         getMovimientos: () => ipcRenderer.invoke('inventario:getMovimientos'),
+        getKardex: (filters) => ipcRenderer.invoke('inventario:getKardex', filters),
+        getAgingAlerts: () => ipcRenderer.invoke('inventario:getAgingAlerts'),
         create: (data) => ipcRenderer.invoke('inventario:create', data),
         delete: (id) => ipcRenderer.invoke('inventario:delete', id)
+    },
+    ventasCafe: {
+        getAll: (filters) => ipcRenderer.invoke('ventasCafe:getAll', filters),
+        getSummary: () => ipcRenderer.invoke('ventasCafe:getSummary'),
+        getAvailability: () => ipcRenderer.invoke('ventasCafe:getAvailability'),
+        nextCode: () => ipcRenderer.invoke('ventasCafe:nextCode'),
+        create: (data) => ipcRenderer.invoke('ventasCafe:create', data),
+        cancel: (id) => ipcRenderer.invoke('ventasCafe:cancel', id)
     },
     // Gastos
     gastos: {
@@ -132,6 +170,11 @@ contextBridge.exposeInMainWorld('api', {
     clima: {
         getRegistros: (dias) => ipcRenderer.invoke('clima:getRegistros', dias),
         crearRegistro: (data) => ipcRenderer.invoke('clima:crearRegistro', data),
+        getLocation: () => ipcRenderer.invoke('clima:getLocation'),
+        setLocation: (data) => ipcRenderer.invoke('clima:setLocation', data),
+        searchLocations: (query) => ipcRenderer.invoke('clima:searchLocations', query),
+        getCurrent: (options) => ipcRenderer.invoke('clima:getCurrent', options),
+        getProviderStatus: () => ipcRenderer.invoke('clima:getProviderStatus'),
         getAlertas: () => ipcRenderer.invoke('clima:getAlertas'),
         crearAlerta: (data) => ipcRenderer.invoke('clima:crearAlerta', data),
         resolverAlerta: (id) => ipcRenderer.invoke('clima:resolverAlerta', id)
@@ -148,7 +191,19 @@ contextBridge.exposeInMainWorld('api', {
     educacion: {
         getArticulos: (categoria) => ipcRenderer.invoke('educacion:getArticulos', categoria),
         getArticulo: (id) => ipcRenderer.invoke('educacion:getArticulo', id),
-        getTip: (modulo, accion) => ipcRenderer.invoke('educacion:getTip', modulo, accion)
+        getTip: (modulo, accion) => ipcRenderer.invoke('educacion:getTip', modulo, accion),
+        getProgress: () => ipcRenderer.invoke('educacion:getProgress'),
+        saveProgress: (data) => ipcRenderer.invoke('educacion:saveProgress', data),
+        saveQuiz: (data) => ipcRenderer.invoke('educacion:saveQuiz', data)
+    },
+    config: {
+        getAll: () => ipcRenderer.invoke('config:getAll'),
+        update: (values) => ipcRenderer.invoke('config:update', values),
+        selectReportLogo: () => ipcRenderer.invoke('config:selectReportLogo'),
+        clearReportLogo: () => ipcRenderer.invoke('config:clearReportLogo')
+    },
+    mcp: {
+        getInfo: () => ipcRenderer.invoke('mcp:getInfo')
     },
     // Backup
     db: {

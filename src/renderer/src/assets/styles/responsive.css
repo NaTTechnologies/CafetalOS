@@ -53,10 +53,13 @@
     display: block;
     position: fixed;
     z-index: 9400;
-    inset: 0;
+    inset: 0 0 0 var(--mobile-sidebar);
     border: 0;
+    padding: 0;
     background: rgba(5,18,14,.48);
     backdrop-filter: blur(2px);
+    cursor: pointer;
+    touch-action: manipulation;
   }
   .collapse-button { display: none; }
   .brand-lockup { height: 76px; padding-inline: 16px; }
@@ -222,3 +225,52 @@
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar, .nav-link, .button, .module-search { transition: none !important; }
 }
+
+/* Cafetal OS 2.4 — adaptación de módulos de alta densidad */
+@media (max-width:1100px){.operation-profile-grid,.learning-paths{grid-template-columns:1fr}.report-settings-grid{grid-template-columns:1fr}.article-layout{grid-template-columns:1fr}.article-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.calculation-strip{grid-template-columns:1fr}.help-layout{grid-template-columns:190px minmax(0,1fr)}}
+@media (max-width:780px){.bulk-modal-content,.weekly-modal-content{width:100vw;height:100dvh;max-height:none;border-radius:0}.bulk-body,.weekly-body{padding:10px}.bulk-toolbar,.weekly-toolbar{align-items:stretch}.bulk-toolbar>label,.weekly-toolbar>label{min-width:calc(50% - 6px);flex:1}.bulk-paste{margin-left:0}.bulk-table-wrap,.weekly-table-wrap{max-height:calc(100dvh - 280px)}.weekly-table th:first-child,.weekly-table td:first-child{min-width:155px}.weekly-table td{min-width:105px}.operation-callout{flex-direction:column}.inline-filters .form-control{width:100%}.education-hero{grid-template-columns:1fr;padding:18px}.education-progress-ring{width:82px;height:82px}.education-controls{align-items:stretch}.education-search{min-width:100%;width:100%}.education-grid{grid-template-columns:1fr}.article-modal-content{width:100vw;height:100dvh;max-height:none;border-radius:0}.article-sidebar{grid-template-columns:1fr}.help-layout{display:block;min-height:auto;border:0;background:transparent}.help-navigation{display:none}.help-mobile-select{display:block}.help-content{padding:14px;border:1px solid var(--line);border-radius:12px;background:white;overflow:visible}.help-content h2{font-size:1.2rem}.help-content h3{font-size:1rem}.help-content table{font-size:.76rem!important}.help-content td,.help-content th{min-width:150px}.page-header.compras-header{flex-direction:column;align-items:stretch}.page-header.compras-header .page-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.page-header.compras-header .page-actions button{justify-content:center}}
+@media (max-width:520px){.bulk-toolbar>label,.weekly-toolbar>label{min-width:100%}.bulk-toolbar .btn,.weekly-toolbar .btn{width:100%;justify-content:center}.bulk-modal-content .modal-footer,.weekly-modal-content .modal-footer{flex-wrap:wrap}.bulk-modal-content .modal-footer .btn,.weekly-modal-content .modal-footer .btn{flex:1 1 calc(50% - 6px);justify-content:center}.operation-profile-grid{gap:8px}.operation-option{padding:12px}.education-hero h3{font-size:1.2rem}.article-modal-content .modal-footer{flex-wrap:wrap}.article-modal-content .modal-footer .btn{flex:1}.page-header.compras-header .page-actions{grid-template-columns:1fr}.calculation-strip{font-size:.8rem}}
+@media (max-width:980px){.season-layout{grid-template-columns:1fr}}
+@media (max-width:520px){.season-date-grid{grid-template-columns:1fr}.season-card{grid-template-columns:1fr}.season-card .status-pill{justify-self:start}}
+
+@media (max-width: 1180px) {
+  .controls-grid,
+  .expert-kpi-grid,
+  .analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .insights-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .controls-grid,
+  .expert-kpi-grid,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-frame.large,
+  .chart-frame.medium {
+    height: 240px;
+  }
+  .legacy-module-content .page-header {
+    align-items: stretch;
+  }
+  .legacy-module-content .page-header .page-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .legacy-module-content .page-header .page-actions .btn,
+  .legacy-module-content .page-header .page-actions button,
+  .legacy-module-content .page-header > .btn,
+  .legacy-module-content .page-header > button {
+    flex: 1 1 100%;
+    margin-left: 0 !important;
+    justify-content: center;
+  }
+}
+
+@media(max-width:1180px){.climate-current-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.climate-live-content-grid,.climate-secondary-grid{grid-template-columns:1fr}.climate-forecast-list{grid-template-columns:repeat(7,minmax(120px,1fr))}}
+@media(max-width:780px){.climate-page-header{flex-direction:column;align-items:stretch}.climate-header-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}.climate-header-actions .btn{justify-content:center}.climate-live-header{flex-direction:column;padding:20px 16px 12px}.climate-provider-meta{align-items:flex-start}.climate-current-grid{grid-template-columns:1fr 1fr;padding:0 16px 16px}.climate-live-content-grid{padding:0 16px 16px}.climate-location-modal{width:100vw;height:100dvh;max-height:none;border-radius:0}.climate-location-search{grid-template-columns:1fr}.climate-location-search .btn{width:100%;justify-content:center}.climate-risk-banner{flex-direction:column}.climate-attribution{text-align:left}}
+@media(max-width:480px){.climate-header-actions{grid-template-columns:1fr}.climate-current-grid{grid-template-columns:1fr}.climate-live-loading,.climate-empty-state,.climate-offline-state{padding:22px 16px}.climate-forecast-list{grid-template-columns:repeat(7,minmax(132px,1fr))}}

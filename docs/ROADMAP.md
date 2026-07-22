@@ -1,66 +1,76 @@
-# Roadmap de Cafetal OS
+# Roadmap
 
-El roadmap prioriza valor para la finca, seguridad de los datos y una migración técnica sostenible. Las fechas dependen de la participación comunitaria y no constituyen compromisos contractuales.
+El roadmap prioriza utilidad real, integridad de datos y una migración gradual hacia una plataforma abierta para toda la cadena del café.
 
-## Versión 2.2 — Base comunitaria y responsive
+## Completado
 
-Estado: implementada.
+### 2.0 — Base moderna
 
-- Identidad Cafetal OS.
-- Login local y múltiples usuarios.
-- Configuración y cambio interno de demo.
-- Sidebar con scroll, grupos y colapso.
-- Búsqueda de módulos.
-- Interfaz responsive desktop/móvil.
-- Galería Playwright desktop y móvil.
-- Documentación de comunidad y contribución.
+- Vue 3 + Electron Vite.
+- Base local, demo y compilación multiplataforma.
+- Navegación, dashboard, pruebas y documentación.
 
-## Versión 2.3 — Dominio Vue y productividad
+### 2.1 — Seguridad y configuración
 
-- Migrar Finca, Lotes y Cosecha a componentes Vue nativos.
-- Separar handlers IPC por dominio.
-- Validaciones compartidas entre interfaz y proceso principal.
-- Auditoría de cambios y papelera antes de eliminar.
-- Importación y exportación CSV con validación previa.
-- Calendario de labores y recordatorios locales.
-- Adjuntos de fotografías y comprobantes.
+- Inicio de sesión local y usuarios.
+- Panel de configuración.
+- Cambio interno entre demo y producción.
 
-## Versión 2.4 — Café especial y trazabilidad
+### 2.2 — Cafetal OS y responsive
 
-- Protocolos de catación configurables.
-- Comparación histórica de cataciones.
-- Trazabilidad volumétrica desde cereza hasta venta.
-- Costos por lote, quintal y proceso.
-- Documentos de certificación y vencimientos.
-- Polígonos GeoJSON y cálculo de superficie.
+- Marca Cafetal OS.
+- Drawer móvil, tablas adaptativas y galería Playwright.
+- Releases automáticas en GitHub.
 
-## Versión 2.5 — Preparación web y móvil
+### 2.3 — IA y reportes
 
-- Extraer repositorios y casos de uso independientes de Electron.
-- Adaptador de almacenamiento web.
-- Manifiesto PWA y Service Worker experimental.
-- Instalación y operación offline en navegador.
-- Diseño táctil y pruebas en tablet/teléfono.
-- Evaluación de Capacitor para Android e iOS.
+- MCP por stdio.
+- Validaciones de dominio.
+- PDF con membrete configurable.
 
-## Versión 3.0 — Ecosistema opcional
+### 2.4 — Productividad de campo y acopio
 
-- Múltiples fincas por instalación.
-- Sincronización cifrada y opcional entre dispositivos.
-- Resolución de conflictos offline.
-- API documentada.
-- Sistema de plugins con permisos explícitos.
-- Catálogo de extensiones comunitarias.
-- Internacionalización regional.
+- Planillas semanales de cortadores.
+- Temporadas de cosecha.
+- Registro masivo y pegado desde Excel.
+- Compras, proveedores, calidad de recepción y acopio.
+- Café comprado enviado a beneficio.
+- Educación interactiva y ayuda responsive.
+- Tools MCP para planillas y compras.
 
-## Criterios para priorizar
+## Próximas prioridades
 
-Una propuesta recibe mayor prioridad cuando:
+### 2.5 — Lotes físicos y liquidaciones
 
-1. resuelve un problema real validado por productores;
-2. funciona offline o degrada correctamente sin internet;
-3. evita duplicidad de registros;
-4. mejora trazabilidad, costos o calidad;
-5. puede probarse automáticamente;
-6. no compromete privacidad ni seguridad;
-7. es mantenible por una comunidad pequeña.
+- Lotes de recepción independientes del lote agronómico.
+- Mezclas, divisiones y sublotes.
+- Contratos y liquidaciones a proveedores.
+- Descuentos configurables por humedad, defectos y rendimiento.
+- Cuentas por pagar del acopio.
+- Importación/exportación Excel formal con plantillas versionadas.
+
+### 2.6 — Costeo y trazabilidad avanzada
+
+- Costeo por lote físico y transformación.
+- Relación exacta corte → proceso → inventario → venta.
+- Rendimiento real por corte/semana.
+- Etiquetas, QR y documentos de entrega.
+- Auditoría de cambios.
+
+### 2.7 — Campo móvil y PWA
+
+- Extracción de un dominio compartido.
+- Persistencia web compatible.
+- PWA instalable y sincronización opcional.
+- Modo de captura offline para cuadrillas.
+- Exploración Android/iOS mediante wrapper o cliente nativo.
+
+## Investigación continua
+
+- Integración con básculas y sensores.
+- Mapa geográfico de lotes.
+- Catálogo configurable de unidades.
+- Modelos locales para alertas y análisis de calidad.
+- Interoperabilidad con cooperativas, laboratorios y sistemas contables.
+
+El roadmap no garantiza fechas. Cada fase requiere validación con usuarios del sector y pruebas sobre datos ficticios antes de producción.

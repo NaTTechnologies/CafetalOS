@@ -17,9 +17,20 @@ if (unresolvedLocalRequires.length) {
   process.exit(1)
 }
 
-if (!source.includes('class AuthStore')) {
-  console.error('AuthStore no quedó integrado en el bundle principal.')
-  process.exit(1)
+const expectedFragments = [
+  ['class AuthStore', 'AuthStore'],
+  ['Cafetal OS MCP local', 'servidor MCP'],
+  ['El área de café no puede superar el área total de la finca.', 'validaciones de dominio'],
+  ['planillas:getWeek', 'planillas semanales'],
+  ['comprasCafe:getAll', 'compras y acopio'],
+  ['bulk:validate', 'registro masivo']
+]
+
+for (const [fragment, label] of expectedFragments) {
+  if (!source.includes(fragment)) {
+    console.error(`${label} no quedó integrado en el bundle principal.`)
+    process.exit(1)
+  }
 }
 
-console.log('Bundle principal verificado: AuthStore integrado y sin require locales pendientes.')
+console.log('Bundle principal verificado: autenticación, MCP y validaciones integrados; sin require locales pendientes.')

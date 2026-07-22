@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cafetal-os": {
+      "command": "C:\\Program Files\\Cafetal OS\\Cafetal OS.exe",
+      "args": ["--mcp"]
+    }
+  }
+}

@@ -1,9 +1,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
-  Archive, CheckCircle2, Database, FileText, HardDrive, KeyRound, Plus, RefreshCw,
-  Save, ShieldCheck, UserCog, UsersRound, XCircle
+  Archive, Bot, CheckCircle2, Database, FileCheck2, FileText, HardDrive, KeyRound, Plus, RefreshCw,
+  Save, Settings2, ShieldCheck, UserCog, UsersRound, XCircle
 } from '@lucide/vue'
+import ReportSettingsPanel from '../components/ReportSettingsPanel.vue'
+import McpSettingsPanel from '../components/McpSettingsPanel.vue'
+import OperationSettingsPanel from '../components/OperationSettingsPanel.vue'
 
 const props = defineProps({
   user: { type: Object, required: true },
@@ -27,6 +30,9 @@ const resetPassword = reactive({ newPassword: '', confirmPassword: '' })
 const isAdmin = computed(() => props.user.rol === 'admin')
 const tabs = computed(() => [
   { id: 'datos', label: 'Datos y demo', icon: Database },
+  { id: 'operacion', label: 'Perfil operativo', icon: Settings2 },
+  { id: 'reportes', label: 'Reportes y membrete', icon: FileCheck2 },
+  { id: 'inteligencia', label: 'IA local (MCP)', icon: Bot },
   { id: 'cuenta', label: 'Mi cuenta', icon: UserCog },
   ...(isAdmin.value ? [{ id: 'usuarios', label: 'Usuarios', icon: UsersRound }] : []),
   { id: 'proyecto', label: 'Proyecto abierto', icon: FileText }
@@ -40,6 +46,11 @@ function flash(message) {
   notice.value = message
   error.value = ''
   window.setTimeout(() => { if (notice.value === message) notice.value = '' }, 4500)
+}
+
+function childError(message) {
+  error.value = message
+  notice.value = ''
 }
 
 async function loadStatus() {
@@ -191,7 +202,7 @@ onMounted(async () => {
 <template>
   <section class="settings-view">
     <header class="settings-heading">
-      <div><span class="eyebrow dark">Administración local</span><h2>Configuración de Cafetal OS</h2><p>Controle la base activa, el acceso de usuarios y la documentación del proyecto.</p></div>
+      <div><span class="eyebrow dark">Administración local</span><h2>Configuración de Cafetal OS</h2><p>Controle datos, usuarios, identidad de reportes, integración con IA local y documentación del proyecto.</p></div>
       <div class="security-chip"><ShieldCheck :size="18" /> Sesión protegida</div>
     </header>
 
@@ -240,6 +251,18 @@ onMounted(async () => {
             <div><Archive :size="22" /><span><strong>Respaldo manual</strong><small>Crea una copia fechada de la base activa antes de cambios importantes.</small></span></div>
             <button class="button outline" type="button" :disabled="loading" @click="backup">Crear respaldo</button>
           </article>
+        </template>
+
+        <template v-else-if="activeTab === 'operacion'">
+          <OperationSettingsPanel :is-admin="isAdmin" @notice="flash" @error="childError" />
+        </template>
+
+        <template v-else-if="activeTab === 'reportes'">
+          <ReportSettingsPanel :is-admin="isAdmin" @notice="flash" @error="childError" />
+        </template>
+
+        <template v-else-if="activeTab === 'inteligencia'">
+          <McpSettingsPanel @notice="flash" @error="childError" />
         </template>
 
         <template v-else-if="activeTab === 'cuenta'">

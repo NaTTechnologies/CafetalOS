@@ -16,6 +16,8 @@ const Ayuda = {
         document.querySelectorAll('.ayuda-tab').forEach(t => {
             t.classList.toggle('active', t.dataset.seccion === id);
         });
+        const mobileSelect = document.querySelector('.help-mobile-select');
+        if (mobileSelect) mobileSelect.value = id;
 
         // Renderizar contenido
         const content = document.getElementById('ayuda-content');
@@ -36,42 +38,31 @@ const Ayuda = {
     },
 
     renderLayout() {
+        const items = [
+            ['manual','📖','Manual de Usuario'],
+            ['glosario','🔬','Glosario Cafetalero'],
+            ['flujo','🔄','Flujo del Café'],
+            ['interfaces','🖥️','Guía por Pantalla'],
+            ['faq','❓','Preguntas Frecuentes'],
+            ['atajos','⌨️','Atajos de Teclado'],
+            ['acerca','ℹ️','Acerca de']
+        ];
         return `
             <div class="page-header">
-                <h2>❓ Ayuda y Documentación</h2>
-                <span style="color:var(--cafe-400);font-size:0.85rem;">Aprende a usar Cafetal OS</span>
+                <div><h2>❓ Ayuda y Documentación</h2><p class="page-subtitle">Aprende a usar Cafetal OS desde escritorio, tablet o móvil.</p></div>
             </div>
-            <div class="page-body" style="padding:0;">
-                <div style="display:flex;height:calc(100vh - 120px);">
-                    <!-- Sidebar interno de ayuda -->
-                    <div style="width:200px;flex-shrink:0;background:var(--cafe-50);border-right:1px solid var(--cafe-200);padding:12px 0;overflow-y:auto;">
-                        <div class="ayuda-tab active" data-seccion="manual" onclick="Ayuda.mostrarSeccion('manual')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            📖 Manual de Usuario
-                        </div>
-                        <div class="ayuda-tab" data-seccion="glosario" onclick="Ayuda.mostrarSeccion('glosario')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            🔬 Glosario Cafetalero
-                        </div>
-                        <div class="ayuda-tab" data-seccion="flujo" onclick="Ayuda.mostrarSeccion('flujo')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            🔄 Flujo del Café
-                        </div>
-                        <div class="ayuda-tab" data-seccion="interfaces" onclick="Ayuda.mostrarSeccion('interfaces')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            🖥️ Guía por Pantalla
-                        </div>
-                        <div class="ayuda-tab" data-seccion="faq" onclick="Ayuda.mostrarSeccion('faq')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            ❓ Preguntas Frecuentes
-                        </div>
-                        <div class="ayuda-tab" data-seccion="atajos" onclick="Ayuda.mostrarSeccion('atajos')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            ⌨️ Atajos de Teclado
-                        </div>
-                        <div class="ayuda-tab" data-seccion="acerca" onclick="Ayuda.mostrarSeccion('acerca')" style="padding:10px 16px;cursor:pointer;border-left:3px solid transparent;font-size:0.9rem;transition:all 0.2s;">
-                            ℹ️ Acerca de
-                        </div>
-                    </div>
-                    <!-- Contenido -->
-                    <div id="ayuda-content" style="flex:1;overflow-y:auto;padding:24px;background:white;"></div>
+            <div class="page-body">
+                <select class="help-mobile-select" aria-label="Seleccionar sección de ayuda" onchange="Ayuda.mostrarSeccion(this.value)">
+                    ${items.map(([id,icon,label]) => `<option value="${id}" ${this.seccionActual === id ? 'selected' : ''}>${icon} ${label}</option>`).join('')}
+                </select>
+                <div class="help-layout">
+                    <nav class="help-navigation" aria-label="Secciones de ayuda">
+                        <h3>Centro de ayuda</h3>
+                        ${items.map(([id,icon,label]) => `<div class="ayuda-tab ${this.seccionActual === id ? 'active' : ''}" data-seccion="${id}" onclick="Ayuda.mostrarSeccion('${id}')">${icon} <span>${label}</span></div>`).join('')}
+                    </nav>
+                    <div id="ayuda-content" class="help-content"></div>
                 </div>
-            </div>
-        `;
+            </div>`;
     },
 
     // ─── Sección 1: Manual de Usuario ───

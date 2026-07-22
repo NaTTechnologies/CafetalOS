@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Sprout, Map, CalendarDays, Repeat2, PackageOpen, WalletCards,
   ChartNoAxesCombined, Leaf, Link2, BrainCircuit, TrendingUp, Megaphone,
-  CloudSun, Coffee, GraduationCap, CircleHelp, Award, Settings
+  CloudSun, Coffee, GraduationCap, CircleHelp, Award, Settings, ShoppingBasket, CircleDollarSign
 } from '@lucide/vue'
 
 export const navigationGroups = [
@@ -12,10 +12,12 @@ export const navigationGroups = [
       { id: 'inicio', label: 'Resumen', icon: LayoutDashboard, description: 'Indicadores y actividad reciente' },
       { id: 'finca', label: 'Mi finca', icon: Sprout, description: 'Datos generales y certificaciones' },
       { id: 'lotes', label: 'Lotes', icon: Map, description: 'Parcelas, variedades e historial' },
-      { id: 'cosecha', label: 'Cosecha', icon: CalendarDays, description: 'Cortes y recolectores' },
-      { id: 'beneficio', label: 'Beneficio', icon: Repeat2, description: 'Procesamiento y rendimiento' },
+      { id: 'cosecha', label: 'Cosecha', icon: CalendarDays, description: 'Planillas, cortes y recolectores' },
+      { id: 'compras', label: 'Compras de café', icon: ShoppingBasket, description: 'Acopio, recepción por peso y proveedores' },
+      { id: 'ventas', label: 'Ventas de café', icon: CircleDollarSign, description: 'Clientes, facturación y salida automática del inventario' },
+      { id: 'beneficio', label: 'Beneficio', icon: Repeat2, description: 'Procesamiento propio o comprado y rendimiento' },
       { id: 'inventario', label: 'Inventario', icon: PackageOpen, description: 'Existencias y movimientos' },
-      { id: 'gastos', label: 'Gastos', icon: WalletCards, description: 'Costos de producción' }
+      { id: 'gastos', label: 'Gastos', icon: WalletCards, description: 'Costos de producción y operación' }
     ]
   },
   {
@@ -37,7 +39,7 @@ export const navigationGroups = [
     items: [
       { id: 'marketing', label: 'Marketing', icon: Megaphone, description: 'Clientes y campañas' },
       { id: 'suscripcion', label: 'Perfiles de café', icon: Coffee, description: 'Sabores y recomendaciones' },
-      { id: 'educacion', label: 'Educación', icon: GraduationCap, description: 'Guías para el caficultor' },
+      { id: 'educacion', label: 'Educación', icon: GraduationCap, description: 'Rutas, lecciones y evaluaciones prácticas' },
       { id: 'ayuda', label: 'Ayuda', icon: CircleHelp, description: 'Manual y preguntas frecuentes' },
       { id: 'configuracion', label: 'Configuración', icon: Settings, description: 'Datos, usuarios y seguridad' }
     ]

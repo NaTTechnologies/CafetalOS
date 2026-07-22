@@ -8,7 +8,7 @@ const error = ref('')
 let observer
 
 const registry = {
-  finca: 'Finca', lotes: 'Lotes', cosecha: 'Cosecha', beneficio: 'Beneficio', inventario: 'Inventario',
+  finca: 'Finca', lotes: 'Lotes', cosecha: 'Cosecha', beneficio: 'Beneficio', inventario: 'Inventario', compras: 'ComprasCafe', ventas: 'VentasCafe',
   gastos: 'Gastos', reportes: 'Reportes', sostenibilidad: 'Sostenibilidad', calidad: 'Calidad', trazabilidad: 'Trazabilidad',
   predictivo: 'Predictivo', mercado: 'Mercado', marketing: 'Marketing', clima: 'Clima',
   suscripcion: 'Suscripcion', educacion: 'Educacion', ayuda: 'Ayuda'
@@ -38,7 +38,9 @@ onMounted(async () => {
     if (!feature?.cargar) throw new Error(`El módulo ${props.moduleId} no está disponible.`)
     await feature.cargar(host.value)
     enhanceResponsiveTables()
-    observer = new window.MutationObserver(enhanceResponsiveTables)
+    window.Validador?.activarInteligencia(host.value)
+    await window.RegistroMasivo?.enhance?.(host.value, props.moduleId)
+    observer = new window.MutationObserver(() => { enhanceResponsiveTables(); window.Validador?.activarInteligencia(host.value); window.RegistroMasivo?.enhance?.(host.value, props.moduleId) })
     observer.observe(host.value, { childList: true, subtree: true })
   } catch (err) {
     console.error(err)

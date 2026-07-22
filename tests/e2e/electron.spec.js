@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test')
 const fs = require('node:fs')
 const path = require('node:path')
-const { launchCafetalOS, resizeWindow } = require('./helpers/electron-app')
+const { launchCafetalOS, resizeWindow, closeMobileNavigation } = require('./helpers/electron-app')
 
 let app, page
 const userDataDir = path.join(process.cwd(), '.tmp', 'e2e-user-data')
@@ -43,7 +43,7 @@ test('adapta la navegación como drawer móvil', async () => {
   await expect(page.locator('.app-shell')).toHaveClass(/is-mobile/)
   await page.getByRole('button', { name: 'Abrir o cerrar menú' }).click()
   await expect(page.locator('.app-shell')).toHaveClass(/mobile-menu-open/)
-  await page.getByRole('button', { name: 'Cerrar menú de navegación' }).click()
+  await closeMobileNavigation(page)
   await expect(page.locator('.app-shell')).not.toHaveClass(/mobile-menu-open/)
   await resizeWindow(app, 1440, 920)
 })

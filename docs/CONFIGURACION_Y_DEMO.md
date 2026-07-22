@@ -1,66 +1,109 @@
-# Configuración, base productiva y demostración
+# Configuración, demo y perfil operativo
 
-El panel **Configuración** es una vista Vue 3 nativa accesible desde el menú lateral, el menú de usuario, el indicador de base de datos o `Ctrl/Cmd + ,`.
+## Datos y demo
 
-## Bases separadas
+La sección **Configuración → Datos y demo** permite:
 
-Cafetal OS mantiene dos archivos de trabajo independientes dentro de `userData`:
+- consultar el archivo activo;
+- cargar o restablecer la demo;
+- regresar a producción;
+- crear un respaldo;
+- verificar versión y modo.
 
-| Modo | Archivo | Uso |
-|---|---|---|
-| Producción | `cafetal-os.db` | Información real de la finca. |
-| Demo | `cafetal-os-demo-runtime.db` | Datos ficticios para capacitación y evaluación. |
+La demo runtime y producción son archivos separados. Restablecer la demo no modifica la base productiva.
 
-Los archivos incluidos en `database/` funcionan como plantillas. La aplicación nunca escribe directamente sobre ellos durante el uso normal.
+## Perfil operativo
 
-## Cargar la demo desde la aplicación
+La pestaña **Perfil operativo** configura cómo entra el café a la organización.
 
-1. Inicie sesión como administrador.
-2. Abra **Configuración → Datos y demo**.
-3. Pulse **Cargar demo completa**.
-4. Confirme la operación.
+### Productor
 
-La aplicación:
+Para fincas que cultivan y cosechan su propia materia prima. El flujo recomendado prioriza lotes, cuadrillas, planillas, beneficio y costos por lote.
 
-1. guarda la base activa;
-2. cierra la instancia SQL.js;
-3. reemplaza la copia runtime demo por `database/cafetal-os-demo.db`;
-4. abre la nueva base;
-5. recarga el renderer para que todos los módulos consulten la demo.
+### Comprador / beneficiador
 
-La operación no modifica la base productiva.
+Para centros de acopio, intermediarios, beneficios o tostadores que reciben café de terceros. El flujo prioriza proveedores, recepción por peso, control de calidad, inventario y transformación.
 
-## Volver a producción
+### Mixta
 
-En el mismo panel pulse **Abrir base productiva**. La demo permanece guardada para una sesión posterior.
+Combina café propio y comprado.
 
-## Restablecer la demostración
+## Parámetros operativos
 
-Pulsar **Cargar demo completa** mientras el modo demo está activo descarta los cambios realizados sobre la copia demo y vuelve al estado distribuido con el repositorio.
+- `cosecha_dias_semana`: cinco, seis o siete columnas de día en la planilla.
+- `compra_control_calidad`: exige información de calidad antes de aprobar o condicionar compras.
+- Temporada activa: aporta unidad, precio y peso predeterminados al crear una semana.
 
-## Respaldo
+La unidad de campo no sustituye el peso comercial. Lata y canasta se convierten a kilogramos mediante un valor configurable en la planilla.
 
-El botón **Crear respaldo** copia la base activa a:
+## Reportes y membrete
 
-```text
-Documentos/CafetalOS/Respaldos/cafetal-os_<modo>_<fecha>.db
-```
+La sección permite configurar:
 
-Se recomienda crear un respaldo antes de importar datos, eliminar registros en volumen o actualizar de versión.
+- nombre de organización;
+- identificación o RTN;
+- dirección;
+- teléfono;
+- correo;
+- web;
+- responsable;
+- logo;
+- colores;
+- pie institucional;
+- visibilidad del logo.
 
-## Scripts compatibles
+### Plantillas rápidas
 
-Los scripts tradicionales continúan disponibles:
+- **Usar datos de la finca:** copia nombre, ubicación y contacto cuando existen.
+- **Identidad Cafetal OS:** aplica valores visuales predeterminados para una instalación comunitaria.
+
+Revise y guarde los valores antes de generar el PDF de prueba.
+
+## IA local (MCP)
+
+Muestra:
+
+- ruta del ejecutable;
+- argumentos productivos o demo;
+- modo lectura/escritura;
+- bloque JSON para cliente;
+- catálogo de tools.
+
+La interfaz no inicia una conexión de red. El cliente externo controla su propia privacidad.
+
+## Mi cuenta y usuarios
+
+- **Mi cuenta:** nombre, usuario y contraseña.
+- **Usuarios:** creación, rol, activación, edición y restablecimiento.
+
+La aplicación impide desactivar o degradar al último administrador activo.
+
+## Proyecto abierto
+
+Incluye versión, licencia, enlaces a documentación y orientación para contribuir.
+
+## Demo 2.6.0
+
+La demostración contiene datos ficticios de:
+
+- finca y lotes;
+- temporadas, cuadrillas y planillas;
+- compras y proveedores;
+- beneficio e inventario;
+- gastos, calidad y sostenibilidad;
+- 365 lecturas climáticas enriquecidas con temperatura, humedad y presión;
+- una respuesta climática de demostración en caché para probar el modo offline;
+- trazabilidad y mercado;
+- progreso educativo.
+
+Puede regenerarse con:
 
 ```bash
-npm run demo
+npm run demo:generate
+```
+
+Y abrirse con:
+
+```bash
 npm run demo:reset
 ```
-
-En Windows:
-
-```bat
-demo.bat
-```
-
-Estos scripts son útiles en desarrollo y CI. Para usuarios finales se recomienda el panel interno.

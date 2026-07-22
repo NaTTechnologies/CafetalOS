@@ -1,28 +1,152 @@
-name: Multiplatform build
+name: Compilar y publicar release
+
 on:
-  workflow_dispatch:
   push:
-    tags: ['v*']
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Etiqueta existente que se publicará, por ejemplo v2.6.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
 jobs:
   build:
+    name: Compilar ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - platform: windows-x64
+            os: windows-latest
             command: build:win
-          - os: macos-latest
+          - platform: macos
+            os: macos-latest
             command: build:mac
-          - os: ubuntu-latest
+          - platform: linux-x64
+            os: ubuntu-latest
             command: build:linux
+
     runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npm run ${{ matrix.command }}
-      - uses: actions/upload-artifact@v4
+      - name: Descargar código de la etiqueta
+        uses: actions/checkout@v4
         with:
-          name: cafetal-os-${{ matrix.os }}
-          path: dist/*
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Verificar versión contra la etiqueta
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const pkg = require('./package.json')
+          const tag = process.env.RELEASE_TAG.replace(/^v/, '')
+          if (pkg.version !== tag) {
+            console.error(`La etiqueta ${process.env.RELEASE_TAG} no coincide con package.json (${pkg.version}).`)
+            process.exit(1)
+          }
+          console.log(`Versión verificada: ${pkg.version}`)
+          NODE
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Descargar binario de Electron
+        run: npx install-electron --no
+
+      - name: Compilar instaladores
+        run: npm run ${{ matrix.command }}
+
+      - name: Guardar instaladores del runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: cafetal-os-${{ matrix.platform }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+            dist/*.AppImage
+            dist/*.deb
+
+  publish:
+    name: Publicar en GitHub Releases
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código de la etiqueta
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Descargar todos los instaladores
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Generar sumas SHA-256
+        shell: bash
+        run: |
+          mapfile -d '' files < <(
+            find release-assets -type f \
+              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.AppImage' -o -name '*.deb' \) \
+              -print0 | sort -z
+          )
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'No se encontraron instaladores para publicar.' >&2
+            exit 1
+          fi
+
+          printf '%s\0' "${files[@]}" | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Crear release y adjuntar instaladores
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -d '' assets < <(
+            find release-assets -type f \
+              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.AppImage' -o -name '*.deb' \) \
+              -print0 | sort -z
+          )
+
+          notes_file="docs/RELEASE_NOTES_${RELEASE_TAG#v}.md"
+          if [ -f "$notes_file" ]; then
+            notes_args=(--notes-file "$notes_file")
+            echo "Usando notas mantenidas: $notes_file"
+          else
+            notes_args=(--generate-notes)
+            echo "No existe $notes_file; se generarán notas automáticas."
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            "${assets[@]}" \
+            SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Cafetal OS ${RELEASE_TAG#v}" \
+            "${notes_args[@]}" \
+            --latest

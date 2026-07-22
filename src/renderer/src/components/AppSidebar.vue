@@ -7,7 +7,7 @@ import brandLogo from '../assets/cafetal-os-logo.png'
 const props = defineProps({
   currentPage: { type: String, required: true },
   collapsed: { type: Boolean, default: false },
-  version: { type: String, default: '2.2.1' }
+  version: { type: String, default: '2.6.0' }
 })
 const emit = defineEmits(['navigate', 'toggle'])
 

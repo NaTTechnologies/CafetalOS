@@ -179,3 +179,33 @@ npm run screenshots
 ```
 
 No confirme `node_modules/`, `out/`, `dist/`, bases runtime, credenciales, respaldos ni datos personales.
+
+## Desarrollar planillas o cargas masivas
+
+Revise conjuntamente:
+
+- `src/renderer/public/legacy/registro-masivo.js`;
+- `src/main/domain-validation.js`;
+- `src/main/index.js`;
+- `src/preload/index.js`;
+- `tests/unit/bulk-workflows.spec.js`;
+- `tests/e2e/screenshots.spec.js`.
+
+No agregue una columna visual sin normalización y validación equivalente en el proceso principal. Para campos relacionados use listas explícitas; no acepte identificadores escritos libremente cuando el usuario puede elegir una entidad activa.
+
+## Desarrollar compras y acopio
+
+El módulo está en `src/renderer/public/legacy/compras.js`. Una recepción puede generar inventario o beneficio, por lo que cualquier cambio debe comprobar efectos laterales y evitar duplicados.
+
+Flujo mínimo de prueba:
+
+1. crear proveedor;
+2. registrar compra pendiente;
+3. completar calidad;
+4. aprobar y verificar inventario;
+5. enviar una compra húmeda a beneficio;
+6. confirmar que el segundo envío se rechaza.
+
+## Desarrollar contenido educativo
+
+El contenido y el progreso deben permanecer separados. Las lecciones pueden crecer sin cambiar el modelo de autenticación. Una contribución de contenido debe indicar audiencia, objetivo, fuente, lista práctica y evaluación.

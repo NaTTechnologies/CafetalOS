@@ -49,6 +49,26 @@ describe('base de datos demo integral', () => {
   })
 
 
+
+  it('incluye planillas, temporadas, compras y proveedores de demostración', () => {
+    expect(count('temporadas_cafe')).toBeGreaterThan(0)
+    expect(count('planillas_corte')).toBeGreaterThanOrEqual(3)
+    expect(count('proveedores_cafe')).toBeGreaterThanOrEqual(5)
+    expect(count('compras_cafe')).toBeGreaterThanOrEqual(5)
+    expect(count('ventas_cafe')).toBeGreaterThanOrEqual(10)
+    expect(count('progreso_educacion')).toBeGreaterThan(0)
+
+    const result = db.exec(`SELECT COUNT(DISTINCT recolector_id), COUNT(DISTINCT fecha)
+      FROM recoleccion WHERE planilla_id IS NOT NULL`)
+    expect(result[0].values[0][0]).toBeGreaterThanOrEqual(10)
+    expect(result[0].values[0][1]).toBeGreaterThanOrEqual(5)
+
+    const salesLink = db.exec(`SELECT COUNT(*) FROM ventas_cafe v
+      JOIN inventario i ON i.id = v.inventario_id
+      WHERE v.estado = 'confirmada' AND i.tipo_movimiento = 'venta'`)
+    expect(salesLink[0].values[0][0]).toBeGreaterThanOrEqual(10)
+  })
+
   it('mantiene limpia la plantilla productiva', async () => {
     const SQL = await initSqlJs()
     const productionPath = path.resolve(process.cwd(), 'database/cafetal-os.db')
@@ -63,6 +83,11 @@ describe('base de datos demo integral', () => {
     expect(productionCount('recolectores')).toBe(0)
     expect(productionCount('certificaciones')).toBe(0)
     expect(productionCount('precios_historicos')).toBe(0)
+    expect(productionCount('temporadas_cafe')).toBe(0)
+    expect(productionCount('planillas_corte')).toBe(0)
+    expect(productionCount('proveedores_cafe')).toBe(0)
+    expect(productionCount('compras_cafe')).toBe(0)
+    expect(productionCount('ventas_cafe')).toBe(0)
     expect(productionCount('variedades')).toBeGreaterThan(0)
     production.close()
   })

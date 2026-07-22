@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test')
 const fs = require('node:fs')
 const path = require('node:path')
-const { launchCafetalOS, resizeWindow } = require('./helpers/electron-app')
+const { launchCafetalOS, resizeWindow, closeMobileNavigation } = require('./helpers/electron-app')
 
 const outputDir = path.join(process.cwd(), 'IMG')
 const desktopDir = path.join(outputDir, 'desktop')
@@ -13,20 +13,22 @@ const modules = [
   ['02-mi-finca.png', 'finca', 'Mi finca'],
   ['03-lotes.png', 'lotes', 'Lotes'],
   ['04-cosecha.png', 'cosecha', 'Cosecha'],
-  ['05-beneficio.png', 'beneficio', 'Beneficio'],
-  ['06-inventario.png', 'inventario', 'Inventario'],
-  ['07-gastos.png', 'gastos', 'Gastos'],
-  ['08-reportes.png', 'reportes', 'Reportes'],
-  ['09-sostenibilidad.png', 'sostenibilidad', 'Sostenibilidad'],
-  ['10-calidad.png', 'calidad', 'Calidad'],
-  ['11-trazabilidad.png', 'trazabilidad', 'Trazabilidad'],
-  ['12-predictivo.png', 'predictivo', 'Predictivo'],
-  ['13-mercado.png', 'mercado', 'Mercado'],
-  ['14-clima.png', 'clima', 'Clima'],
-  ['15-marketing.png', 'marketing', 'Marketing'],
-  ['16-perfiles-cafe.png', 'suscripcion', 'Perfiles de café'],
-  ['17-educacion.png', 'educacion', 'Educación'],
-  ['18-ayuda.png', 'ayuda', 'Ayuda']
+  ['05-compras-cafe.png', 'compras', 'Compras de café'],
+  ['06-ventas-cafe.png', 'ventas', 'Ventas de café'],
+  ['07-beneficio.png', 'beneficio', 'Beneficio'],
+  ['08-inventario.png', 'inventario', 'Inventario'],
+  ['09-gastos.png', 'gastos', 'Gastos'],
+  ['10-reportes.png', 'reportes', 'Reportes'],
+  ['11-sostenibilidad.png', 'sostenibilidad', 'Sostenibilidad'],
+  ['12-calidad.png', 'calidad', 'Calidad'],
+  ['13-trazabilidad.png', 'trazabilidad', 'Trazabilidad'],
+  ['14-predictivo.png', 'predictivo', 'Predictivo'],
+  ['15-mercado.png', 'mercado', 'Mercado'],
+  ['16-clima.png', 'clima', 'Clima'],
+  ['17-marketing.png', 'marketing', 'Marketing'],
+  ['18-perfiles-cafe.png', 'suscripcion', 'Perfiles de café'],
+  ['19-educacion.png', 'educacion', 'Educación'],
+  ['20-ayuda.png', 'ayuda', 'Ayuda']
 ]
 
 async function waitForVisualReady(page) {
@@ -61,16 +63,51 @@ async function openModule(page, route, label) {
 async function captureSettings(page, directory) {
   await page.evaluate(() => window.App.cargarPagina('configuracion'))
   await expect(page.getByRole('heading', { name: 'Configuración de Cafetal OS' })).toBeVisible()
-  await save(page, directory, '19-configuracion-datos.png')
+  await save(page, directory, '20-configuracion-datos.png')
+
+  await page.getByRole('button', { name: 'Perfil operativo' }).click()
+  await expect(page.getByRole('heading', { name: 'Perfil de operación cafetalera' })).toBeVisible()
+  await save(page, directory, '21-configuracion-operacion.png')
+
+  await page.getByRole('button', { name: 'Reportes y membrete' }).click()
+  await expect(page.getByRole('heading', { name: 'Identidad institucional' })).toBeVisible()
+  await save(page, directory, '22-configuracion-membrete.png')
+
+  await page.getByRole('button', { name: 'IA local (MCP)' }).click()
+  await expect(page.getByRole('heading', { name: 'Servidor MCP por stdio' })).toBeVisible()
+  await save(page, directory, '23-configuracion-mcp.png')
 
   await page.getByRole('button', { name: 'Mi cuenta' }).click()
-  await save(page, directory, '20-configuracion-cuenta.png')
+  await save(page, directory, '24-configuracion-cuenta.png')
 
   await page.getByRole('button', { name: 'Usuarios' }).click()
-  await save(page, directory, '21-configuracion-usuarios.png')
+  await save(page, directory, '25-configuracion-usuarios.png')
 
   await page.getByRole('button', { name: 'Proyecto abierto' }).click()
-  await save(page, directory, '22-configuracion-proyecto.png')
+  await save(page, directory, '26-configuracion-proyecto.png')
+}
+
+async function captureOperationalDialogs(page, directory, prefix = '') {
+  await openModule(page, 'cosecha', 'Cosecha')
+  await page.getByRole('button', { name: /Planilla semanal/i }).click()
+  await expect(page.getByRole('heading', { name: 'Planilla semanal de cortadores' })).toBeVisible()
+  await save(page, directory, `${prefix}planilla-semanal.png`)
+  await page.getByRole('button', { name: 'Cancelar' }).last().click()
+
+  await openModule(page, 'lotes', 'Lotes')
+  await page.getByRole('button', { name: /Registro masivo/i }).click()
+  await expect(page.getByRole('heading', { name: 'Registro masivo de lotes' })).toBeVisible()
+  await save(page, directory, `${prefix}registro-masivo-lotes.png`)
+  await page.getByRole('button', { name: 'Cancelar' }).last().click()
+
+  await openModule(page, 'compras', 'Compras de café')
+  await page.getByRole('button', { name: /Compras masivas/i }).click()
+  await expect(page.getByRole('heading', { name: 'Compras masivas de café' })).toBeVisible()
+  await save(page, directory, `${prefix}registro-masivo-compras.png`)
+  await page.getByRole('button', { name: /Pegar desde Excel/i }).click()
+  await expect(page.getByRole('heading', { name: 'Pegar filas desde Excel o Google Sheets' })).toBeVisible()
+  await save(page, directory, `${prefix}pegar-excel-compras.png`)
+  await page.getByRole('button', { name: 'Cancelar' }).last().click()
 }
 
 test.describe.configure({ mode: 'serial' })
@@ -104,19 +141,22 @@ test('genera la galería desktop y móvil con la base demo', async () => {
       await save(page, desktopDir, filename)
     }
     await captureSettings(page, desktopDir)
+    await captureOperationalDialogs(page, desktopDir, '27-')
 
     await resizeWindow(app, 430, 900)
     await openModule(page, 'inicio', 'Resumen')
     await page.getByRole('button', { name: 'Abrir o cerrar menú' }).click()
     await expect(page.locator('.app-shell')).toHaveClass(/mobile-menu-open/)
     await save(page, mobileDir, '00-menu-lateral.png')
-    await page.getByRole('button', { name: 'Cerrar menú de navegación' }).click()
+    await closeMobileNavigation(page)
+    await expect(page.locator('.app-shell')).not.toHaveClass(/mobile-menu-open/)
 
     for (const [filename, route, label] of modules) {
       await openModule(page, route, label)
       await save(page, mobileDir, filename)
     }
     await captureSettings(page, mobileDir)
+    await captureOperationalDialogs(page, mobileDir, '27-')
   } finally {
     await app.close()
   }

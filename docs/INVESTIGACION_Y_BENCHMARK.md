@@ -58,3 +58,29 @@ El contexto hondureño requiere productividad, competitividad, sostenibilidad, f
 - farmOS: https://farmos.org/
 - Cropster Origin: https://www.cropster.com/products/origin/
 - IHCAFE: https://www.ihcafe.hn/
+
+## Investigación aplicada a Cafetal OS 2.4.0
+
+### Corte y cuadrillas
+
+La captura semanal se diseñó alrededor del trabajo manual selectivo: una misma cuadrilla puede realizar varios pases y registrar cantidades distintas por persona/día. Por eso la matriz conserva el nombre del cortador, el día, la fecha, la unidad operativa, el peso de referencia y el pago.
+
+### Compras por peso
+
+La ruta de acopio registra las transacciones comerciales por kg y su equivalencia a qq. La lata o canasta se conserva únicamente como unidad operativa de corte. Esta separación evita usar el recipiente de campo como unidad comercial y permite comparar proveedores y rendimientos.
+
+### Trazabilidad de recepción
+
+Una compra conserva proveedor, finca/origen, lote del proveedor, comprobante, producto, cantidad, calidad, inventario y transformación. El diseño sigue el principio de reconocer el paso anterior y el paso siguiente de la cadena.
+
+### Calidad y rendimiento
+
+Humedad, defectos y rendimiento de transformación se registran como información operativa. El sistema permite condicionar una recepción y evita presentar un rango orientativo como certificación automática.
+
+### Fuentes adicionales
+
+- IHCAFE, comercialización: https://ihcafe.hn/comercializacion-de-cafe/
+- SCA, Coffee Standards: https://sca.coffee/research/coffee-standards
+- UNIDO, Traceability in the Green Coffee Supply Chain: https://www.unido.org/publications/ot/9654750/pdf
+- CNPML Honduras, guía para beneficios de café: https://www.cnpml-honduras.org/wp-content/uploads/2018/02/Guia_de_P_mas_L__para_beneficios_de_cafe.pdf
+- TechnoServe, Coffee Wet Mill Processing Guide: https://www.technoserve.org/wp-content/uploads/2014/02/coffee-wet-mill-processing-guide.pdf

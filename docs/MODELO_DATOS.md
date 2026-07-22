@@ -1,59 +1,99 @@
 # Modelo de datos
 
-La persistencia usa SQLite ejecutado mediante `sql.js`. El esquema se encuentra en `database/schema.sql` y debe permanecer idempotente.
+Cafetal OS utiliza SQLite ejecutado mediante `sql.js`. El esquema canónico está en `database/schema.sql`; las migraciones del proceso principal preservan bases creadas por versiones anteriores.
 
-## Núcleo operativo
+## Unidad productiva y lotes
 
-| Tabla | Propósito | Relaciones principales |
+| Tabla | Propósito | Relaciones |
 |---|---|---|
-| `finca` | Información general de la unidad productiva. | Padre de `lotes` y `certificaciones`. |
-| `variedades` | Catálogo de variedades de café. | Referenciada por `lotes` y perfiles de sabor. |
-| `lotes` | Parcelas productivas. | Finca, variedad, cosecha, beneficio, gastos y sostenibilidad. |
-| `recolectores` | Personas que participan en el corte. | Referenciada por `recoleccion`. |
-| `recoleccion` | Cortes diarios y pago operativo. | Lote y recolector. |
-| `beneficio` | Transformación de cereza a pergamino. | Lote; origen de entradas a inventario. |
-| `inventario` | Entradas, salidas y ajustes por producto. | Lote y, cuando aplica, beneficio. |
-| `gastos` | Costos por categoría y período. | Lote opcional. |
+| `finca` | Información general de la operación activa. | Padre de lotes y certificaciones. |
+| `variedades` | Catálogo de variedades. | Lotes y perfiles sensoriales. |
+| `lotes` | Parcelas productivas. | Finca, variedad, cosecha, beneficio y gastos. |
 
-## Calidad y sostenibilidad
+`lotes.es_sistema = 1` identifica lotes técnicos ocultos, como `ACOPIO-EXTERNO`. Estos registros permiten mantener compatibilidad con procesos heredados y no aparecen en KPI agronómicos.
 
-- `calidad_evaluaciones`: puntaje SCA y atributos sensoriales.
+## Temporadas, cuadrillas y corte
+
+| Tabla/campo | Propósito |
+|---|---|
+| `temporadas_cafe` | Define ciclo, fechas, estado, unidad de corte, precio y peso predeterminados. |
+| `recolectores` | Personas que integran las cuadrillas. |
+| `planillas_corte` | Cabecera única por lote y semana. |
+| `recoleccion` | Movimiento diario de una persona en un lote. |
+| `recoleccion.planilla_id` | Vincula el movimiento con la planilla semanal. |
+| `recoleccion.unidad_corte` | Conserva lata, canasta o kilogramo. |
+| `recoleccion.cantidad_unidad` | Cantidad original capturada en campo. |
+
+La planilla se descompone en movimientos diarios para que los reportes existentes continúen operando.
+
+## Compras y acopio
+
+| Tabla/campo | Propósito |
+|---|---|
+| `proveedores_cafe` | Productor, finca, cooperativa u otro origen comercial. |
+| `compras_cafe` | Recepción por peso, producto, precio, calidad, ubicación y trazabilidad. |
+| `compras_cafe.inventario_id` | Entrada creada cuando la compra se aprueba o condiciona. |
+| `beneficio.compra_id` | Compra que originó un proceso. |
+| `beneficio.origen_tipo` | `propio` o `comprado`. |
+| `inventario.compra_id` | Compra que originó el movimiento. |
+| `inventario.costo_origen` | Costo atribuible al producto recibido. |
+
+Estados físicos admitidos: `cereza`, `pergamino_humedo`, `pergamino_seco`, `verde` y `tostado`.
+
+Estados de calidad: `pendiente`, `aprobado`, `condicionado` y `rechazado`.
+
+## Transformación, inventario y costos
+
+- `beneficio`: cereza o materia prima, proceso, fermentación, secado, humedad y pergamino.
+- `inventario`: entradas, salidas, ajustes y ventas en kg y qq.
+- `gastos`: costos por categoría, lote, cantidad, costo unitario y total.
+
+El quintal se representa actualmente como 46 kg en los cálculos internos.
+
+## Calidad, sostenibilidad y trazabilidad
+
+- `calidad_evaluaciones`: puntaje y atributos sensoriales.
 - `huella_carbono`: actividad, cantidad y CO2e estimado.
-- `practicas_regenerativas`: prácticas por lote, área y vigencia.
-- `certificaciones`: tipo, entidad, fechas y archivo de referencia.
+- `practicas_regenerativas`: práctica, lote, área y vigencia.
+- `certificaciones`: tipo, entidad y fechas.
+- `lotes_origen`: código que relaciona lote, cosecha, beneficio e inventario.
+- `bloques_trazabilidad`: cadena local con `hash_bloque` y `hash_anterior`.
 
-## Trazabilidad
+La cadena hash ayuda a detectar alteraciones; no representa consenso distribuido ni certificación de terceros.
 
-- `lotes_origen` relaciona lote, cosecha, beneficio e inventario mediante un código único.
-- `bloques_trazabilidad` forma una cadena local con `hash_bloque` y `hash_anterior`.
+## Educación
 
-La cadena debe ser verificable y no se debe modificar un bloque histórico sin reconstruirla explícitamente. No representa consenso distribuido.
+| Tabla | Propósito |
+|---|---|
+| `articulos` | Contenido educativo. |
+| `tips_contextuales` | Recomendaciones breves por módulo/acción. |
+| `progreso_educacion` | Avance y estado por usuario/artículo. |
+| `evaluaciones_educacion` | Puntaje, total y respuestas de ejercicios. |
 
-## Mercado y clientes
+## Configuración
 
-- `precios_historicos`, `benchmarks`.
-- `clientes_marketing`, `campanas_marketing`, `lealtad_puntos`.
-- `perfiles_sabor`, `recomendaciones_cliente`.
+La tabla `configuracion` almacena claves como:
 
-## Clima y conocimiento
-
-- `registros_clima`, `alertas_fitosanitarias`.
-- `articulos`, `tips_contextuales`.
+- `operacion_tipo`;
+- `cosecha_dias_semana`;
+- `compra_control_calidad`;
+- datos y colores del membrete;
+- ruta y visibilidad del logotipo.
 
 ## Convenciones
 
-- Fechas de negocio: `YYYY-MM-DD`.
-- Fecha/hora técnica: formato SQLite local o ISO 8601 según tabla.
-- Importes: `REAL`, mostrados en lempiras cuando corresponda.
-- Quintal: 46 kg en cálculos internos.
-- Borrado lógico: se utiliza `activo` en entidades maestras; los movimientos históricos requieren revisión antes de borrado físico.
+- Fecha de negocio: `YYYY-MM-DD`.
+- Fecha/hora técnica: SQLite local o ISO 8601 según el caso.
+- Importes: `REAL`, normalmente mostrados en lempiras.
+- Borrado lógico: `activo` para entidades maestras.
+- Relaciones: se validan nuevamente en el proceso principal.
+- Operaciones masivas: transacción completa con rollback ante cualquier error.
 
-## Cambios de esquema
+## Reglas para cambios de esquema
 
-Cada cambio debe:
-
-1. ser idempotente;
-2. preservar bases existentes;
-3. incluir prueba de migración y respaldo;
-4. documentar valores por defecto;
-5. actualizar demo, manual y changelog.
+1. Mantener el esquema idempotente.
+2. Agregar migración para bases existentes.
+3. Preservar datos productivos.
+4. Actualizar plantilla, demo y pruebas de integridad.
+5. Documentar columnas, valores predeterminados y reversión.
+6. Crear respaldo antes de probar una migración sobre datos reales.

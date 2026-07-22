@@ -1,8 +1,8 @@
 {
   "name": "cafetal-os",
-  "version": "2.2.1",
+  "version": "2.6.0",
   "private": false,
-  "description": "Sistema open source, offline-first y multiplataforma para la gestión integral de fincas cafetaleras.",
+  "description": "Sistema open source, offline-first y multiplataforma para producción, cosecha, acopio, beneficio, inventario y gestión integral del café.",
   "main": "./out/main/index.js",
   "type": "commonjs",
   "license": "MIT",
@@ -44,7 +44,11 @@
     "capturas": "npm run screenshots",
     "clean:build": "node scripts/clean-generated.js out",
     "clean:screenshots": "node scripts/clean-generated.js test-results playwright-report .tmp/screenshots-user-data",
-    "security:audit": "npm audit --audit-level=moderate"
+    "security:audit": "npm audit --audit-level=moderate",
+    "mcp": "node scripts/run-mcp.cjs",
+    "mcp:demo": "node scripts/run-mcp.cjs --demo",
+    "mcp:write": "node scripts/run-mcp.cjs --write",
+    "mcp:inspect": "node scripts/mcp-smoke-test.cjs"
   },
   "dependencies": {
     "@lucide/vue": "1.25.0",
@@ -95,6 +99,13 @@
       {
         "from": "docs",
         "to": "docs",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "mcp",
+        "to": "mcp",
         "filter": [
           "**/*"
         ]

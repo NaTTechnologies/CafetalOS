@@ -5,18 +5,46 @@
 <h1 align="center">Cafetal OS</h1>
 
 <p align="center">
-  Sistema open source, offline-first y multiplataforma para administrar fincas cafetaleras desde el lote hasta la taza.
+  Sistema open source, offline-first y multiplataforma para producción, corte, acopio, beneficio, inventario, calidad y comercialización del café.
 </p>
 
 <p align="center">
-  <strong>Vue 3 · Electron · SQL.js · Vitest · Playwright · MIT</strong>
+  <strong>Vue 3 · Electron · SQL.js · MCP stdio · Vitest · Playwright · MIT</strong>
 </p>
 
-## Propósito
+## Qué es Cafetal OS
 
-Cafetal OS busca convertir la gestión diaria de una finca cafetalera en información útil y trazable. Está pensado para productores, administradores de finca, técnicos agrícolas, organizaciones de café y desarrolladores que quieran construir tecnología abierta para el sector.
+Cafetal OS convierte la operación diaria del café en información útil y trazable. Está pensado para fincas, productores, cuadrillas, cooperativas, centros de acopio, beneficios, compradores, tostadores y organizaciones que necesitan trabajar localmente incluso cuando la conectividad es limitada.
 
-La aplicación funciona localmente, no requiere conexión permanente a internet y mantiene separadas la base productiva y la base demostrativa.
+La aplicación permite dos rutas de origen:
+
+- **Café propio:** finca → lote → corte → beneficio → inventario → calidad → venta.
+- **Café comprado:** proveedor → recepción por peso → control de calidad → inventario o beneficio → venta.
+
+La base productiva y la base demostrativa permanecen separadas. El sistema no necesita una conexión permanente a internet para operar.
+
+## Cafetal OS 2.6.0
+
+Esta versión incorpora flujos pensados para trabajo real de campo y acopio:
+
+- **Planilla semanal de cortadores:** filas por persona y columnas por día/fecha, con totales, kilos y pago.
+- **Temporadas de cosecha:** unidad, precio y peso de referencia predeterminados.
+- **Registro masivo:** tablas amplias para lotes, cortadores, cosecha, beneficio, inventario, gastos, proveedores, compras, clima y calidad.
+- **Pegado desde Excel:** importa rangos tabulados, resuelve listas y valida cada fila antes de guardar.
+- **Compras y acopio:** recepción de cereza, pergamino húmedo, pergamino seco, verde y tostado.
+- **Ventas de café:** salida comercial transaccional, cliente, factura, precio y restitución al anular.
+- **Kardex y alertas:** saldo por producto/origen, capas FIFO y avisos de permanencia o humedad.
+- **Control de calidad de compras:** humedad, defectos, decisión y observaciones antes de incorporar inventario.
+- **Rentabilidad semanal de corte:** seguimiento operativo de pago, transformación, costo y margen estimado.
+- **Educación interactiva:** rutas, progreso, lectura profunda y evaluaciones por usuario.
+- **Ayuda responsive:** navegación y contenido adaptados a ventanas pequeñas.
+- **Membrete configurable:** identidad institucional, logo, contacto, colores y pie para PDF.
+- **MCP local ampliado:** tools para planillas de corte y compras/acopio, además de finca, calidad, inventario y finanzas.
+- **Inspección y depuración:** `F12`, menú **Ver** y clic derecho → **Inspeccionar elemento**.
+- **Clima por Open-Meteo:** condiciones actuales, presión superficial, pronóstico de siete días, geolocalización, búsqueda manual, caché de 30 minutos y modo offline.
+- **Planilla semanal corregida:** la selección de lote vuelve a consultar y guardar la semana sin el error `loteId is not defined`.
+
+Consulte [Notas de la versión 2.6.0](docs/RELEASE_NOTES_2.6.0.md), la guía [Clima por Open-Meteo](docs/CLIMA_OPEN_METEO.md) y [Ventas, kardex y almacenamiento](docs/VENTAS_KARDEX_Y_ALMACENAMIENTO.md).
 
 ## Vista general
 
@@ -31,21 +59,38 @@ La aplicación funciona localmente, no requiere conexión permanente a internet 
   </tr>
 </table>
 
-Estas imágenes son referencias del rediseño que originó la interfaz actual. La galería reproducible de cada versión se genera en `IMG/desktop/` y `IMG/mobile/` mediante Playwright.
+La galería reproducible de cada versión se genera en `IMG/desktop/` y `IMG/mobile/` mediante Playwright. Incluye planilla semanal, registro masivo, compras, ventas, kardex, clima conectado, configuración, ayuda y educación.
 
 ## Funciones principales
 
-- Finca, lotes, variedades y certificaciones.
-- Cosecha, recolectores y costos por corte.
-- Beneficio húmedo/seco, humedad y rendimiento.
-- Inventario, movimientos, gastos y reportes.
-- Calidad y catación, trazabilidad y sostenibilidad.
-- Clima, alertas fitosanitarias, mercado y análisis predictivo.
-- Clientes, campañas, perfiles de café y contenido educativo.
-- Inicio de sesión local, múltiples usuarios y roles.
-- Base demo restaurable desde la propia aplicación.
-- Respaldos locales y exportaciones.
-- Interfaz desktop y responsive con drawer móvil y tablas adaptativas.
+### Producción propia
+
+- Finca, lotes, variedades, densidad, altitud y certificaciones.
+- Cortadores, cortes diarios y planillas semanales.
+- Beneficio húmedo/seco, fermentación, secado, humedad y rendimiento.
+- Inventario, movimientos, ventas, gastos y rentabilidad.
+
+### Compra y transformación
+
+- Proveedores de café y datos de origen.
+- Compras por peso y estado físico del producto.
+- Revisión de humedad, defectos y aceptación.
+- Entrada automática a inventario para compras aprobadas o condicionadas.
+- Envío de cereza o pergamino húmedo comprado a beneficio.
+
+### Inteligencia y trazabilidad
+
+- Calidad y catación, sostenibilidad, clima conectado con Open-Meteo y alertas fitosanitarias.
+- Trazabilidad local con códigos, QR y cadena hash operativa.
+- Reportes productivos, financieros y de rentabilidad.
+- Servidor MCP local por `stdio` para clientes de inteligencia artificial.
+
+### Comunidad y aprendizaje
+
+- Educación interactiva con rutas y evaluaciones.
+- Ayuda integrada y responsive.
+- Clientes, campañas, fidelización y perfiles de café.
+- Documentación abierta, gobernanza y guías de contribución.
 
 ## Inicio rápido en Windows
 
@@ -53,7 +98,7 @@ Requisitos:
 
 - Windows 10 u 11.
 - Node.js 22.12 o superior.
-- Conexión a internet durante la primera instalación de dependencias y Electron.
+- Conexión a internet durante la primera instalación de dependencias y del binario de Electron.
 
 Pasos:
 
@@ -64,7 +109,7 @@ Pasos:
 5. Cambie la contraseña en **Configuración → Mi cuenta**.
 6. Cargue la demostración desde **Configuración → Datos y demo**.
 
-> No mezcle versiones nuevas sobre carpetas antiguas. Cada entrega debe descomprimirse en su propia carpeta para evitar módulos compilados obsoletos.
+> No mezcle versiones nuevas sobre carpetas antiguas. Cada release debe instalarse o descomprimirse en una carpeta independiente.
 
 ## Inicio desde terminal
 
@@ -74,11 +119,61 @@ npx install-electron --no
 npm run dev
 ```
 
-Para abrir una demo regenerada:
+Para regenerar y abrir la demo:
 
 ```bash
 npm run demo:reset
 ```
+
+## Flujo recomendado de operación
+
+### Finca productora
+
+1. Configure **Perfil operativo → Productor**.
+2. Registre finca y lotes.
+3. Cree los cortadores.
+4. Abra **Cosecha → Planilla semanal**.
+5. Registre beneficio, inventario, gastos y calidad.
+6. Revise reportes y margen por semana/lote.
+
+### Centro de acopio o beneficio
+
+1. Configure **Perfil operativo → Comprador / beneficiador**.
+2. Cree proveedores.
+3. Registre compras individuales o masivas.
+4. Revise humedad y defectos.
+5. Apruebe, condicione o rechace la recepción.
+6. Incorpore inventario o envíe la compra a beneficio.
+
+### Operación mixta
+
+Seleccione **Mixta** para conservar ambos flujos en una misma instalación.
+
+## Registro masivo
+
+Los módulos operativos muestran un botón de registro masivo. La matriz ocupa casi toda la ventana, mantiene cabeceras visibles y admite listas desplegables para relaciones.
+
+Flujo:
+
+1. agregue filas o pegue una tabla desde Excel;
+2. pulse **Validar**;
+3. corrija las filas señaladas;
+4. pulse **Guardar todos**.
+
+El bloque se guarda dentro de una transacción: si una fila es inválida, no se persiste ninguna. Consulte [Registro masivo](docs/REGISTRO_MASIVO.md).
+
+## Planillas de corte
+
+La planilla semanal reproduce el formato de campo habitual:
+
+- primera columna: cortadores;
+- columnas siguientes: lunes, martes, miércoles, jueves, viernes y fecha real;
+- totales por persona, día, kilos y pago;
+- soporte de cinco, seis o siete días;
+- unidad en lata, canasta o kilogramo;
+- conversión configurable a kilogramos.
+
+Consulte [Planillas semanales de corte](docs/PLANILLAS_CORTE.md).
 
 ## Comandos del proyecto
 
@@ -92,129 +187,152 @@ npm run demo:reset
 | `npm run test:coverage` | Genera cobertura de Vitest. |
 | `npm run test:e2e` | Ejecuta pruebas de humo sobre Electron. |
 | `npm run screenshots` | Genera galerías desktop y móvil en `IMG/`. |
+| `npm run mcp` | Inicia el servidor MCP productivo en solo lectura. |
+| `npm run mcp:demo` | Inicia MCP sobre la base demostrativa. |
+| `npm run mcp:write` | Habilita las tools explícitas de escritura. |
+| `npm run mcp:inspect` | Ejecuta la prueba de humo del servidor MCP. |
 | `npm run lint` | Valida JavaScript y Vue con ESLint. |
-| `npm run verify` | Comprueba que la entrega tenga sus archivos esenciales. |
-| `npm run security:audit` | Audita las dependencias con npm. |
-| `npm run build:app` | Compila main, preload y renderer sin crear instalador. |
+| `npm run verify` | Comprueba archivos esenciales de la entrega. |
+| `npm run security:audit` | Audita dependencias con npm. |
+| `npm run build:app` | Compila main, preload y renderer. |
 | `npm run build:win` | Genera NSIS y portable para Windows. |
-| `npm run build:mac` | Genera DMG y ZIP; debe ejecutarse en macOS. |
+| `npm run build:mac` | Genera DMG y ZIP en macOS. |
 | `npm run build:linux` | Genera AppImage y DEB en Linux. |
 
 ## Capturas automatizadas
 
-En Windows puede ejecutar:
+En Windows:
 
 ```bat
 capturar-pantallas.bat
 ```
 
-O desde cualquier terminal:
+O desde terminal:
 
 ```bash
 npm run screenshots
 ```
 
-El proceso:
-
-1. regenera la demo;
-2. compila la aplicación;
-3. inicia Electron desde la raíz del proyecto;
-4. entra con `admin` / `admin`;
-5. recorre todos los módulos;
-6. genera capturas desktop de 1600 × 1000;
-7. genera capturas móviles de 430 × 900;
-8. guarda diagnóstico de Playwright si Electron termina antes de abrir la ventana.
-
-No use:
-
-```bash
-npx run screenshots
-```
-
-`npx run` puede descargar y ejecutar un paquete diferente llamado `run`, lo que produce mensajes como `Watching...`, `Starting: screenshots` y `Cannot find module .../screenshots`. El comando correcto es **`npm run screenshots`**.
+El proceso regenera la demo, compila, abre Electron, inicia sesión y captura versiones desktop y móvil. No use `npx run screenshots`; el comando correcto es `npm run screenshots`.
 
 Consulte [Capturas con Playwright](docs/CAPTURAS_PLAYWRIGHT.md) y [Galería de interfaces](IMG/README.md).
 
+## Inteligencia artificial local con MCP
+
+Cafetal OS puede actuar como servidor MCP por `stdio`. En modo de lectura publica tools para finca, lotes, corte, planillas, compras, beneficio, inventario, finanzas, calidad, alertas, trazabilidad y contexto de reportes.
+
+```bash
+npm run mcp:demo
+```
+
+La escritura está deshabilitada por defecto y requiere `--write`. No se expone SQL libre ni la tabla de usuarios.
+
+Consulte [MCP local para inteligencia artificial](docs/MCP_IA_LOCAL.md).
+
+## Formularios asistidos y PDF profesionales
+
+Los formularios críticos aplican reglas de dominio, cálculos derivados y advertencias contextuales. La misma validación se ejecuta nuevamente en el proceso principal antes de guardar.
+
+Los PDF pueden incluir:
+
+- logotipo;
+- nombre e identificación institucional;
+- dirección, teléfono, correo y web;
+- responsable;
+- colores corporativos;
+- pie institucional y numeración.
+
+Consulte [Validaciones inteligentes](docs/VALIDACIONES_INTELIGENTES.md) y [Reportes PDF y membrete](docs/REPORTES_MEMBRETE.md).
+
 ## Diseño responsive
 
-La ventana de Electron puede reducirse hasta 360 píxeles de ancho. En pantallas pequeñas:
+La interfaz se adapta desde escritorio hasta ventanas de 360 píxeles:
 
-- el sidebar se convierte en un drawer lateral;
-- el buscador se abre como una capa móvil;
-- el contenido mantiene scroll independiente;
-- las tablas operativas se transforman en tarjetas con etiquetas;
-- formularios, paneles y botones se apilan progresivamente;
-- se respetan áreas seguras y preferencias de movimiento reducido.
+- sidebar convertido en drawer;
+- scroll independiente del menú y del panel;
+- tablas transformadas en tarjetas cuando corresponde;
+- matrices masivas con desplazamiento controlado;
+- modales de trabajo en pantalla casi completa;
+- ayuda y educación adaptadas a móvil.
 
-Esta base facilita una futura evolución hacia PWA, Android e iOS, pero la versión actual sigue siendo una aplicación Electron. Consulte [Arquitectura responsive y evolución móvil](docs/RESPONSIVE_Y_MOVIL.md).
+Esta arquitectura prepara una futura evolución hacia PWA, Android e iOS; la versión actual sigue siendo Electron. Consulte [Responsive y evolución móvil](docs/RESPONSIVE_Y_MOVIL.md).
 
 ## Arquitectura
 
 ```text
-src/main/                    proceso principal, base local, autenticación e IPC
-src/preload/                 contrato seguro expuesto a Vue
+src/main/                    proceso principal, base, autenticación, dominio, MCP e IPC
+src/preload/                 contrato seguro expuesto al renderer
 src/renderer/src/            shell y componentes Vue 3
-src/renderer/public/legacy/  módulos heredados encapsulados durante la migración
+src/renderer/public/legacy/  módulos encapsulados durante la migración
+src/renderer/public/legacy/registro-masivo.js  matrices y planillas semanales
 database/                    esquema, semillas y bases plantilla
-scripts/                     instalación, demo, validación, capturas y builds
+scripts/                     demo, validación, capturas, MCP y builds
 tests/unit/                  Vitest y Vue Test Utils
 tests/e2e/                   Playwright Electron
-IMG/                         galería desktop/móvil y documentación visual
+IMG/                         galería desktop/móvil
 docs/                        manuales funcionales y técnicos
-branding/                    originales y derivados de identidad visual
+branding/                    identidad visual
+mcp/                         ejemplos de clientes MCP
 ```
 
-La migración usa un patrón incremental: la navegación, autenticación, dashboard, configuración y sistema visual son Vue 3; los módulos operativos heredados siguen encapsulados hasta ser convertidos individualmente.
+La migración es incremental: navegación, autenticación, dashboard y configuración son Vue 3; varios módulos operativos todavía se ejecutan mediante adaptadores heredados hasta su conversión a componentes nativos.
 
 ## Datos y privacidad
 
 - Producción: `cafetal-os.db` dentro de `userData` de Electron.
-- Demo: `cafetal-os-demo-runtime.db`, separada de producción.
+- Demo runtime: `cafetal-os-demo-runtime.db`.
 - Plantillas del repositorio: `database/cafetal-os.db` y `database/cafetal-os-demo.db`.
-- Usuarios: `security/users.json`, con contraseñas derivadas mediante `scrypt` y salt individual.
+- Usuarios: `security/users.json`, con `scrypt` y salt individual.
 - Respaldos: `Documentos/CafetalOS/Respaldos/`.
-- No se envían datos a servicios externos por defecto.
+- MCP no abre un puerto de red por defecto; el cliente de IA determina el tratamiento posterior de las respuestas.
 
-La versión 2.2 migra automáticamente nombres de base locales utilizados por versiones anteriores cuando se encuentran en el mismo directorio de usuario.
+Antes de actualizar una base productiva, cree un respaldo.
 
 ## Cómo participar
 
-No es necesario ser programador. La comunidad necesita distintos perfiles:
+La comunidad necesita cafetaleros, cortadores, administradores, técnicos, catadores, compradores, diseñadores, formadores y desarrolladores.
 
-- **Cafetaleros:** validar flujos, términos, unidades y necesidades reales.
-- **Técnicos y agrónomos:** revisar cálculos, alertas y prácticas agrícolas.
-- **Catadores y compradores:** fortalecer calidad, perfiles y trazabilidad.
-- **Diseñadores:** mejorar accesibilidad y experiencia en campo.
-- **Desarrolladores:** migrar módulos a Vue, corregir errores y ampliar pruebas.
-- **Documentadores y formadores:** crear manuales, videos y material educativo.
+Áreas especialmente valiosas:
 
-Lea [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md) y [COMMUNITY.md](COMMUNITY.md) antes de enviar una contribución.
+- revisar la planilla semanal con cuadrillas reales;
+- validar unidades y pagos de corte;
+- documentar procesos de compra, acopio y liquidación;
+- proponer reglas de calidad y trazabilidad;
+- crear lecciones educativas;
+- probar matrices masivas y layouts móviles;
+- migrar módulos heredados a Vue 3.
+
+Lea [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md) y [COMMUNITY.md](COMMUNITY.md).
 
 ## Documentación
 
-### Para usuarios
+### Operación
 
 - [Manual de usuario](docs/MANUAL_USUARIO.md)
 - [Catálogo de módulos](docs/MODULOS.md)
+- [Planillas semanales de corte](docs/PLANILLAS_CORTE.md)
+- [Registro masivo](docs/REGISTRO_MASIVO.md)
+- [Compras, acopio y transformación](docs/COMPRAS_ACOPIO.md)
+- [Educación interactiva](docs/EDUCACION_INTERACTIVA.md)
 - [Configuración y demo](docs/CONFIGURACION_Y_DEMO.md)
-- [Autenticación y usuarios](docs/AUTENTICACION_USUARIOS.md)
+- [Reportes PDF y membrete](docs/REPORTES_MEMBRETE.md)
 - [Galería de interfaces](IMG/README.md)
 
-### Para colaboradores técnicos
+### Desarrollo
 
 - [Guía de desarrollo](docs/DESARROLLO.md)
 - [Arquitectura](docs/ARQUITECTURA.md)
 - [Modelo de datos](docs/MODELO_DATOS.md)
 - [Contrato IPC](docs/API_IPC.md)
-- [Migración a Vue](docs/MIGRACION_VUE.md)
+- [MCP local](docs/MCP_IA_LOCAL.md)
+- [Clima por Open-Meteo](docs/CLIMA_OPEN_METEO.md)
 - [Pruebas](docs/TESTING.md)
 - [Capturas con Playwright](docs/CAPTURAS_PLAYWRIGHT.md)
-- [Responsive y evolución móvil](docs/RESPONSIVE_Y_MOVIL.md)
-- [Identidad visual](docs/IDENTIDAD_VISUAL.md)
 - [Compilación y distribución](docs/BUILD.md)
-- [Seguridad](SECURITY.md)
+- [Publicar releases en GitHub](docs/PUBLICAR_RELEASE_GITHUB.md)
+- [Checklist de release](docs/RELEASE_CHECKLIST.md)
 
-### Para la comunidad
+### Comunidad
 
 - [Cómo contribuir](CONTRIBUTING.md)
 - [Gobernanza](GOVERNANCE.md)
@@ -223,13 +341,32 @@ Lea [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md) y [COMMUN
 - [Código de conducta](CODE_OF_CONDUCT.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Historial de cambios](CHANGELOG.md)
-- [Cómo citar el proyecto](CITATION.cff)
-- [Decisiones de arquitectura](docs/decisions/README.md)
+- [Citación](CITATION.cff)
+
+## Publicar Cafetal OS 2.6.0 en GitHub
+
+Después de subir el código a `main`:
+
+```bash
+git add .
+git commit -m "release: Cafetal OS 2.6.0"
+git push origin main
+git tag -a v2.6.0 -m "Cafetal OS 2.6.0"
+git push origin v2.6.0
+```
+
+El workflow `.github/workflows/release.yml` compila Windows, macOS y Linux, verifica que la etiqueta coincida con `package.json`, genera `SHA256SUMS.txt` y crea la GitHub Release.
+
+En Windows también puede ejecutar:
+
+```bat
+publicar-release.bat 2.6.0
+```
 
 ## Estado del proyecto
 
-Cafetal OS está en desarrollo activo. Antes de utilizarlo como única fuente de información productiva, tributaria, comercial o de certificación, valide los reportes y mantenga respaldos independientes.
+Cafetal OS está en desarrollo activo. No debe utilizarse como única fuente tributaria, contractual, de certificación o diagnóstico agronómico sin validación profesional y respaldos independientes.
 
 ## Licencia y marca
 
-El código se distribuye bajo licencia MIT. El nombre **Cafetal OS**, su identidad visual y el logo suministrado deben tratarse conforme a [docs/IDENTIDAD_VISUAL.md](docs/IDENTIDAD_VISUAL.md). La licencia del código no concede derechos sobre datos, certificaciones o contenido de terceros.
+El código se distribuye bajo licencia MIT. La identidad **Cafetal OS** se documenta en [Identidad visual](docs/IDENTIDAD_VISUAL.md).

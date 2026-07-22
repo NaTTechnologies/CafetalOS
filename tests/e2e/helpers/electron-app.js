@@ -75,4 +75,28 @@ async function resizeWindow(app, width, height) {
   }, { width, height })
 }
 
-module.exports = { launchCafetalOS, resizeWindow }
+async function closeMobileNavigation(page) {
+  const sidebar = page.locator('.app-sidebar')
+  const backdrop = page.getByRole('button', { name: 'Cerrar menú de navegación' })
+
+  await backdrop.waitFor({ state: 'visible' })
+  const [sidebarBox, backdropBox] = await Promise.all([
+    sidebar.boundingBox(),
+    backdrop.boundingBox()
+  ])
+
+  if (!sidebarBox || !backdropBox) {
+    throw new Error('No fue posible medir el drawer móvil y su fondo de cierre.')
+  }
+
+  const sidebarRight = sidebarBox.x + sidebarBox.width
+  if (backdropBox.x < sidebarRight - 1) {
+    throw new Error(
+      `El fondo móvil invade el drawer: backdrop.x=${backdropBox.x}, sidebar.right=${sidebarRight}.`
+    )
+  }
+
+  await backdrop.click({ position: { x: Math.min(12, Math.max(1, backdropBox.width / 2)), y: 24 } })
+}
+
+module.exports = { launchCafetalOS, resizeWindow, closeMobileNavigation }

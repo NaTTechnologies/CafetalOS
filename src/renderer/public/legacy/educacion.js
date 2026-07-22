@@ -1,315 +1,246 @@
-// ─── Cafetal OS — Módulo de Contenido Educativo ───
+// ─── Cafetal OS — Centro de aprendizaje cafetalero interactivo ───
 
 const Educacion = {
-    async cargar(container) {
-        try {
-            const articulos = await window.api.educacion.getArticulos();
+    categoriaFiltro: '',
+    busqueda: '',
+    articulos: [],
+    progreso: [],
+    container: null,
 
-            container.innerHTML = `
-                <div class="page-header">
-                    <h2>📚 Educación Cafetalera</h2>
-                    <span style="color:var(--cafe-400);font-size:0.85rem;">Aprende más sobre el mundo del café</span>
-                </div>
-                <div class="page-body">
-                    <!-- Filtro de categorías -->
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-                        <button class="btn btn-sm ${!Educacion.categoriaFiltro ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('')">📚 Todos</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'sostenibilidad' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('sostenibilidad')">🌱 Sostenibilidad</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'variedades' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('variedades')">🌳 Variedades</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'beneficio' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('beneficio')">🔄 Beneficio</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'tostion' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('tostion')">🔥 Tostión</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'metodos_preparacion' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('metodos_preparacion')">☕ Preparación</button>
-                        <button class="btn btn-sm ${Educacion.categoriaFiltro === 'comercializacion' ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('comercializacion')">💰 Comercialización</button>
-                    </div>
+    categorias: {
+        sostenibilidad: { label: 'Sostenibilidad', icon: '🌱' },
+        variedades: { label: 'Variedades', icon: '🌳' },
+        beneficio: { label: 'Beneficio', icon: '🔄' },
+        comercializacion: { label: 'Comercialización', icon: '📈' },
+        tostion: { label: 'Tostión', icon: '🔥' },
+        metodos_preparacion: { label: 'Preparación', icon: '☕' }
+    },
 
-                    <!-- Artículos -->
-                    <div id="educacion-articulos" class="card-grid">
-                        ${articulos.length === 0 ? `
-                            <div class="card full-width">
-                                <div class="card-body text-center" style="padding:40px;">
-                                    <div style="font-size:3rem;margin-bottom:12px;">📚</div>
-                                    <h3 style="color:var(--cafe-600);margin:0 0 8px;">Biblioteca Educativa</h3>
-                                    <p style="color:var(--cafe-400);margin:0 0 16px;">No hay artículos disponibles. ¡Inicializa la biblioteca!</p>
-                                    <button class="btn btn-primary" onclick="Educacion.inicializarArticulos()">⚙️ Inicializar Biblioteca</button>
-                                </div>
-                            </div>
-                        ` : articulos.map(a => Educacion.renderCard(a)).join('')}
-                    </div>
+    rutas: [
+        { id: 'produccion', icon: '🌿', titulo: 'De la finca a la cosecha', categorias: ['variedades', 'sostenibilidad'], descripcion: 'Variedades, manejo del cultivo, prevención y prácticas regenerativas.' },
+        { id: 'calidad', icon: '🧪', titulo: 'Del fruto a la calidad', categorias: ['beneficio', 'tostion'], descripcion: 'Beneficio, secado, humedad, rendimiento y transformación del café.' },
+        { id: 'negocio', icon: '🤝', titulo: 'Del inventario al mercado', categorias: ['comercializacion', 'metodos_preparacion'], descripcion: 'Costos, compras, ventas, valor de taza y comunicación con clientes.' }
+    ],
 
-                    <!-- Calculadora de valor -->
-                    <div class="card mt-4" style="border-left:4px solid var(--oro-cafe);">
-                        <div class="card-header">💰 Calculadora: ¿Cuánto vale tu café?</div>
-                        <div class="card-body">
-                            <p style="margin:0 0 12px;font-size:0.85rem;color:var(--cafe-500);">
-                                Calcula el valor estimado de tu café basado en el puntaje SCA y el precio de referencia.
-                            </p>
-                            <div class="form-row-4">
-                                <div class="form-group">
-                                    <label>Puntaje SCA (0-100)</label>
-                                    <input type="number" id="edu-sca" class="form-control" value="84" step="0.1" min="0" max="100">
-                                </div>
-                                <div class="form-group">
-                                    <label>Precio Referencia (USD/kg)</label>
-                                    <input type="number" id="edu-precio-ref" class="form-control" value="8.47" step="0.01">
-                                </div>
-                                <div class="form-group">
-                                    <label>Producción (qq)</label>
-                                    <input type="number" id="edu-qq" class="form-control" value="50">
-                                </div>
-                                <div class="form-group">
-                                    <label>Tipo de Café</label>
-                                    <select id="edu-tipo" class="form-control">
-                                        <option value="arabica">Arábica</option>
-                                        <option value="robusta">Robusta</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" onclick="Educacion.calcularValor()">💰 Calcular Valor</button>
-                            <div id="edu-resultado" style="margin-top:16px;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de Métodos de Preparación -->
-                    <div class="card mt-4">
-                        <div class="card-header">☕ Guías de Preparación</div>
-                        <div class="card-body">
-                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
-                                <div class="card" style="cursor:pointer;border:2px solid var(--cafe-100);" onclick="Educacion.mostrarGuia('chemex')">
-                                    <div class="card-body text-center" style="padding:20px;">
-                                        <div style="font-size:2.5rem;">🧪</div>
-                                        <h4 style="margin:8px 0 4px;">Chemex</h4>
-                                        <p style="font-size:0.8rem;color:var(--cafe-400);margin:0;">Café limpio y brillante</p>
-                                    </div>
-                                </div>
-                                <div class="card" style="cursor:pointer;border:2px solid var(--cafe-100);" onclick="Educacion.mostrarGuia('v60')">
-                                    <div class="card-body text-center" style="padding:20px;">
-                                        <div style="font-size:2.5rem;">🍶</div>
-                                        <h4 style="margin:8px 0 4px;">V60</h4>
-                                        <p style="font-size:0.8rem;color:var(--cafe-400);margin:0;">Acidez resaltada</p>
-                                    </div>
-                                </div>
-                                <div class="card" style="cursor:pointer;border:2px solid var(--cafe-100);" onclick="Educacion.mostrarGuia('francesa')">
-                                    <div class="card-body text-center" style="padding:20px;">
-                                        <div style="font-size:2.5rem;">☕</div>
-                                        <h4 style="margin:8px 0 4px;">Francesa</h4>
-                                        <p style="font-size:0.8rem;color:var(--cafe-400);margin:0;">Cuerpo completo</p>
-                                    </div>
-                                </div>
-                                <div class="card" style="cursor:pointer;border:2px solid var(--cafe-100);" onclick="Educacion.mostrarGuia('espresso')">
-                                    <div class="card-body text-center" style="padding:20px;">
-                                        <div style="font-size:2.5rem;">⚡</div>
-                                        <h4 style="margin:8px 0 4px;">Espresso</h4>
-                                        <p style="font-size:0.8rem;color:var(--cafe-400);margin:0;">Intenso y concentrado</p>
-                                    </div>
-                                </div>
-                                <div class="card" style="cursor:pointer;border:2px solid var(--cafe-100);" onclick="Educacion.mostrarGuia('cold-brew')">
-                                    <div class="card-body text-center" style="padding:20px;">
-                                        <div style="font-size:2.5rem;">🧊</div>
-                                        <h4 style="margin:8px 0 4px;">Cold Brew</h4>
-                                        <p style="font-size:0.8rem;color:var(--cafe-400);margin:0;">Suave y refrescante</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } catch (err) {
-            console.error('Error cargando educación:', err);
-            container.innerHTML = `<div class="page-body"><p>Error al cargar educación.</p></div>`;
+    contenidoExtra: {
+        beneficio: {
+            objetivos: ['Distinguir las etapas del beneficio.', 'Registrar variables que afectan el rendimiento.', 'Reconocer señales de riesgo en fermentación y secado.'],
+            checklist: ['Pesar el café recibido.', 'Registrar hora de despulpado.', 'Controlar fermentación por lote.', 'Medir humedad antes de almacenar.'],
+            quiz: { pregunta: '¿Qué dato permite comparar la eficiencia entre la cereza recibida y el pergamino obtenido?', opciones: ['La altitud de la finca', 'El rendimiento de conversión', 'El número de cortadores'], correcta: 1 }
+        },
+        comercializacion: {
+            objetivos: ['Diferenciar precio, costo y margen.', 'Registrar compras por peso y estado físico.', 'Documentar origen y calidad del lote.'],
+            checklist: ['Confirmar peso neto.', 'Identificar proveedor y origen.', 'Evaluar humedad y defectos.', 'Calcular costo total y costo por kg.'],
+            quiz: { pregunta: 'Al recibir café comprado, ¿qué conjunto ofrece mayor trazabilidad?', opciones: ['Nombre informal y total pagado', 'Proveedor, peso, estado, calidad y fecha', 'Solo el número de sacos'], correcta: 1 }
+        },
+        sostenibilidad: {
+            objetivos: ['Relacionar prácticas de campo con riesgos.', 'Documentar acciones ambientales.', 'Convertir observaciones en planes de seguimiento.'],
+            checklist: ['Identificar el lote.', 'Registrar evidencia.', 'Asignar responsable.', 'Definir fecha de revisión.'],
+            quiz: { pregunta: '¿Qué registro vuelve accionable una observación de campo?', opciones: ['Una nota sin fecha', 'Responsable, evidencia y seguimiento', 'Solo una fotografía'], correcta: 1 }
+        },
+        variedades: {
+            objetivos: ['Reconocer atributos agronómicos.', 'Relacionar variedad y lote.', 'Usar información varietal para planificar.'],
+            checklist: ['Confirmar variedad.', 'Registrar año de siembra.', 'Documentar altitud y suelo.', 'Revisar comportamiento productivo.'],
+            quiz: { pregunta: '¿Dónde debe quedar vinculada la variedad para analizar su desempeño?', opciones: ['En el lote', 'Solo en una nota general', 'En el nombre del usuario'], correcta: 0 }
+        },
+        tostion: {
+            objetivos: ['Entender el propósito del perfil.', 'Relacionar materia prima y resultado.', 'Documentar pruebas repetibles.'],
+            checklist: ['Identificar lote de origen.', 'Registrar peso inicial.', 'Anotar tiempo y temperatura.', 'Guardar resultado sensorial.'],
+            quiz: { pregunta: '¿Qué hace reproducible una prueba de tueste?', opciones: ['Recordar el color', 'Registrar variables y lote', 'Cambiar varios factores a la vez'], correcta: 1 }
+        },
+        metodos_preparacion: {
+            objetivos: ['Controlar proporción, molienda y temperatura.', 'Comparar resultados.', 'Comunicar el perfil de taza.'],
+            checklist: ['Pesar café y agua.', 'Registrar molienda.', 'Controlar tiempo.', 'Anotar percepción sensorial.'],
+            quiz: { pregunta: '¿Qué práctica facilita comparar dos preparaciones?', opciones: ['Medir las variables', 'Usar cantidades aproximadas', 'Cambiar método y café al mismo tiempo'], correcta: 0 }
         }
     },
 
-    renderCard(articulo) {
-        return `
-            <div class="card" style="cursor:pointer;" onclick="Educacion.mostrarArticulo(${articulo.id})">
-                <div class="card-body">
-                    <div style="font-size:2rem;margin-bottom:8px;">${articulo.icono || '📖'}</div>
-                    <h4 style="margin:0 0 6px;font-size:1rem;color:var(--cafe-800);">${Utils.escapar(articulo.titulo)}</h4>
-                    <p style="font-size:0.8rem;color:var(--cafe-500);margin:0 0 8px;line-height:1.4;">${Utils.escapar(articulo.resumen || '')}</p>
-                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;">
-                        <span class="badge badge-nuevo">${articulo.categoria || 'general'}</span>
-                        ${articulo.fuente ? `<span style="color:var(--cafe-400);">${Utils.escapar(articulo.fuente)}</span>` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
+    async cargar(container) {
+        this.container = container;
+        try {
+            const [articulos, progreso] = await Promise.all([
+                window.api.educacion.getArticulos(),
+                window.api.educacion.getProgress().catch(() => [])
+            ]);
+            this.articulos = articulos || [];
+            this.progreso = progreso || [];
+            this.render();
+        } catch (error) {
+            console.error('Error cargando educación:', error);
+            container.innerHTML = `<div class="page-body"><div class="module-error">No se pudo cargar el centro educativo: ${Utils.escapar(error.message)}</div></div>`;
+        }
     },
 
-    async inicializarArticulos() {
-        try {
-            const articulos = [
-                { titulo: '¿Qué es el Café de Especialidad?', resumen: 'Conoce los estándares SCA y qué hace que un café sea de especialidad (puntaje ≥ 80).', contenido_texto: 'El café de especialidad se define por su puntaje SCA (Specialty Coffee Association)...', categoria: 'comercializacion', icono: '🏆', fuente: 'SCA' },
-                { titulo: 'Guía de Variedades Hondureñas', resumen: 'IHCAFE 90, Parainema, Lempira, Catuaí... conoce las variedades más cultivadas en Honduras.', contenido_texto: 'Honduras cultiva principalmente variedades arábicas...', categoria: 'variedades', icono: '🌳', fuente: 'IHCAFE' },
-                { titulo: 'Beneficio Húmedo Paso a Paso', resumen: 'Desde la cereza hasta el pergamino seco: despulpado, fermentación, lavado y secado.', contenido_texto: 'El beneficio húmedo es el proceso estándar en Honduras...', categoria: 'beneficio', icono: '🔄', fuente: 'IHCAFE' },
-                { titulo: 'Perfiles de Tueste para Café de Especialidad', resumen: 'Cómo el nivel de tueste afecta el sabor: claro, medio u oscuro para cada variedad.', contenido_texto: 'El tueste es donde el café desarrolla su sabor...', categoria: 'tostion', icono: '🔥', fuente: 'SCA' },
-                { titulo: 'Métodos de Preparación: Chemex', resumen: 'Guía completa para preparar café en Chemex: proporciones, temperatura y técnica.', contenido_texto: 'La Chemex fue inventada en 1941 por el Dr. Peter Schlumbohm...', categoria: 'metodos_preparacion', icono: '🧪', fuente: 'SCA' },
-                { titulo: 'Métodos de Preparación: V60', resumen: 'Domina el V60 y resalta la acidez y notas florales de tu café.', contenido_texto: 'El Hario V60 es uno de los métodos más populares...', categoria: 'metodos_preparacion', icono: '🍶', fuente: 'Barista Hustle' },
-                { titulo: 'Certificaciones de Café: ¿Cuál elegir?', resumen: 'Orgánico, Rainforest, Comercio Justo, Bird Friendly: diferencias y costos.', contenido_texto: 'Las certificaciones son cada vez más importantes...', categoria: 'sostenibilidad', icono: '🏆', fuente: 'Rainforest Alliance' },
-                { titulo: 'Cómo Calcular tu Costo de Producción', resumen: 'Aprende a calcular el costo real por quintal de café producido en tu finca.', contenido_texto: 'Conocer tu costo de producción es esencial...', categoria: 'comercializacion', icono: '💰', fuente: 'IHCAFE' },
-                { titulo: 'La Roya del Café: Prevención y Control', resumen: 'Identifica, prevé y controla la roya del café en tus lotes.', contenido_texto: 'La roya del café (Hemileia vastatrix) es la enfermedad...', categoria: 'sostenibilidad', icono: '🍂', fuente: 'IHCAFE' },
-                { titulo: 'Compostaje para Fincas Cafetaleras', resumen: 'Transforma los desechos del beneficio en abono orgánico para tus lotes.', contenido_texto: 'El compostaje convierte la pulpa de café...', categoria: 'sostenibilidad', icono: '♻️', fuente: 'CATIE' }
-            ];
-            for (const a of articulos) {
-                await window.api.educacion.getArticulos(); // warm up
-            }
-            // Since we don't have a direct create articulo API, we'll use a workaround
-            // Actually we need to add a create endpoint. But we can use the educacion:getArticulos which already exists.
-            // Let me insert via direct window.api call
-            Utils.toast('✅ Biblioteca educativa cargada con 10 artículos.');
-            App.cargarPagina('educacion');
-        } catch (err) { Utils.toast('❌ Error: ' + err.message, 'error'); }
+    progressFor(id) {
+        return this.progreso.find(item => Number(item.articulo_id) === Number(id)) || { progreso_porcentaje: 0, estado: 'pendiente' };
+    },
+
+    get filtered() {
+        const term = this.busqueda.trim().toLowerCase();
+        return this.articulos.filter(article => {
+            const categoryMatch = !this.categoriaFiltro || article.categoria === this.categoriaFiltro;
+            const text = `${article.titulo || ''} ${article.resumen || ''} ${article.fuente || ''}`.toLowerCase();
+            return categoryMatch && (!term || text.includes(term));
+        });
+    },
+
+    summary() {
+        const total = this.articulos.length || 1;
+        const completed = this.progreso.filter(item => item.estado === 'completado' || Number(item.progreso_porcentaje) >= 100).length;
+        const started = this.progreso.filter(item => Number(item.progreso_porcentaje) > 0).length;
+        return { completed, started, percent: Math.round((completed / total) * 100) };
+    },
+
+    render() {
+        if (!this.container) return;
+        const stats = this.summary();
+        const cards = this.filtered.map(article => this.renderCard(article)).join('');
+        this.container.innerHTML = `
+            <div class="page-header">
+                <div><h2>📚 Educación Cafetalera</h2><p class="page-subtitle">Aprendizaje práctico conectado con la operación de la finca, el beneficio y la comercialización.</p></div>
+            </div>
+            <div class="page-body education-shell">
+                <section class="education-hero">
+                    <div>
+                        <span class="badge badge-nuevo">Centro de aprendizaje</span>
+                        <h3>Aprender, aplicar y dejar evidencia</h3>
+                        <p>Abra una lección, revise objetivos, complete la lista de aplicación y responda una evaluación corta. El avance se conserva por usuario.</p>
+                    </div>
+                    <div class="education-progress-ring" style="--edu-progress:${stats.percent}%"><span>${stats.percent}%<small>${stats.completed}/${this.articulos.length} completadas</small></span></div>
+                </section>
+
+                <section>
+                    <div class="education-section-title"><h3>Rutas sugeridas</h3><small>${stats.started} lecciones iniciadas</small></div>
+                    <div class="learning-paths">${this.rutas.map(route => this.renderRoute(route)).join('')}</div>
+                </section>
+
+                <section class="education-controls">
+                    <input class="education-search" type="search" placeholder="Buscar tema, fuente o palabra clave…" value="${Utils.escapar(this.busqueda)}" oninput="Educacion.buscar(this.value)" aria-label="Buscar contenido educativo">
+                    <div class="education-filters">
+                        <button class="btn btn-sm ${!this.categoriaFiltro ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('')">Todos</button>
+                        ${Object.entries(this.categorias).map(([key, value]) => `<button class="btn btn-sm ${this.categoriaFiltro === key ? 'btn-primary' : 'btn-outline'}" onclick="Educacion.filtrar('${key}')">${value.icon} ${value.label}</button>`).join('')}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="education-section-title"><h3>Biblioteca práctica</h3><small>${this.filtered.length} contenidos</small></div>
+                    <div class="education-grid">${cards || '<div class="education-empty">No se encontraron contenidos con estos filtros.</div>'}</div>
+                </section>
+            </div>`;
+    },
+
+    renderRoute(route) {
+        const articles = this.articulos.filter(article => route.categorias.includes(article.categoria));
+        const completed = articles.filter(article => this.progressFor(article.id).estado === 'completado').length;
+        const percent = articles.length ? Math.round((completed / articles.length) * 100) : 0;
+        return `<article class="learning-path" onclick="Educacion.abrirRuta('${route.id}')">
+            <div style="font-size:1.8rem">${route.icon}</div><h4>${route.titulo}</h4><p>${route.descripcion}</p>
+            <div class="learning-progress"><span style="width:${percent}%"></span></div><footer><span>${articles.length} lecciones</span><strong>${percent}%</strong></footer>
+        </article>`;
+    },
+
+    renderCard(article) {
+        const progress = this.progressFor(article.id);
+        const completed = progress.estado === 'completado' || Number(progress.progreso_porcentaje) >= 100;
+        const category = this.categorias[article.categoria] || { label: article.categoria || 'General', icon: '📖' };
+        return `<article class="education-card ${completed ? 'completed' : ''}" onclick="Educacion.mostrarArticulo(${article.id})" tabindex="0" role="button" onkeydown="if(event.key==='Enter') Educacion.mostrarArticulo(${article.id})">
+            <div class="education-card-icon">${article.icono || category.icon}</div>
+            <h4>${Utils.escapar(article.titulo)}</h4><p>${Utils.escapar(article.resumen || '')}</p>
+            <div class="learning-progress"><span style="width:${Number(progress.progreso_porcentaje || 0)}%"></span></div>
+            <footer><span class="badge badge-nuevo">${category.label}</span>${completed ? '<span class="complete-mark">✓ Completada</span>' : `<span>${Number(progress.progreso_porcentaje || 0)}%</span>`}</footer>
+        </article>`;
+    },
+
+    buscar(value) { this.busqueda = value || ''; this.render(); },
+    filtrar(category) { this.categoriaFiltro = category; this.render(); },
+    abrirRuta(id) {
+        const route = this.rutas.find(item => item.id === id);
+        this.categoriaFiltro = route?.categorias?.[0] || '';
+        this.busqueda = '';
+        this.render();
+        document.querySelector('.education-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+
+    articleSections(article) {
+        const text = String(article.contenido_texto || article.resumen || 'Contenido pendiente de ampliar.');
+        const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+        const middle = Math.max(1, Math.ceil(sentences.length / 2));
+        return [sentences.slice(0, middle).join(' '), sentences.slice(middle).join(' ')].filter(Boolean);
     },
 
     async mostrarArticulo(id) {
         try {
-            const a = await window.api.educacion.getArticulo(id);
-            if (!a) return;
+            const article = await window.api.educacion.getArticulo(id);
+            if (!article) return;
+            const extra = this.contenidoExtra[article.categoria] || this.contenidoExtra.comercializacion;
+            const progress = this.progressFor(id);
+            const sections = this.articleSections(article);
+            await window.api.educacion.saveProgress({ articulo_id: id, progreso_porcentaje: Math.max(25, Number(progress.progreso_porcentaje || 0)), estado: 'iniciado' });
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay active';
             overlay.id = 'modal-articulo';
             overlay.innerHTML = `
-                <div class="modal-content" style="max-width:650px;">
-                    <div class="modal-header">
-                        <h3>${a.icono || '📖'} ${Utils.escapar(a.titulo)}</h3>
-                        <button class="modal-close" onclick="Utils.cerrarModal('modal-articulo')">&times;</button>
-                    </div>
+                <div class="modal-content article-modal-content">
+                    <div class="modal-header"><div><h3>${article.icono || '📖'} ${Utils.escapar(article.titulo)}</h3><small>${Utils.escapar(article.fuente || 'Biblioteca Cafetal OS')}</small></div><button class="modal-close" aria-label="Cerrar lección" onclick="Educacion.cerrarArticulo()">&times;</button></div>
                     <div class="modal-body">
-                        <p style="color:var(--cafe-400);font-size:0.8rem;margin:0 0 8px;">
-                            ${a.categoria ? `<span class="badge badge-nuevo">${a.categoria}</span>` : ''}
-                            ${a.fuente ? ` · Fuente: ${Utils.escapar(a.fuente)}` : ''}
-                        </p>
-                        <div style="line-height:1.7;color:var(--cafe-700);font-size:0.95rem;">
-                            ${Utils.escapar(a.contenido_texto || a.resumen || 'Contenido no disponible.')}
+                        <div class="article-layout">
+                            <article class="article-content">
+                                <p><strong>${Utils.escapar(article.resumen || '')}</strong></p>
+                                <h4>1. Contexto</h4><p>${Utils.escapar(sections[0] || '')}</p>
+                                <h4>2. Aplicación en Cafetal OS</h4><p>${Utils.escapar(sections[1] || 'Conecte este conocimiento con los registros del módulo correspondiente y compare resultados por lote, temporada o proveedor.')}</p>
+                                <h4>3. Decisión práctica</h4><p>No registre información solo para archivar. Utilice el dato para decidir qué corregir, qué repetir y qué evidencia conservar para la siguiente temporada.</p>
+                                <div class="article-box"><h4>Objetivos de aprendizaje</h4><ul>${extra.objetivos.map(item => `<li>${item}</li>`).join('')}</ul></div>
+                            </article>
+                            <aside class="article-sidebar">
+                                <div class="article-box"><h4>Lista de aplicación</h4><div class="article-checklist">${extra.checklist.map((item, index) => `<label><input type="checkbox" data-edu-check="${index}" onchange="Educacion.actualizarProgreso(${id})"> ${item}</label>`).join('')}</div></div>
+                                <div class="article-box"><h4>Pregunta rápida</h4><p>${extra.quiz.pregunta}</p><div class="quiz-options">${extra.quiz.opciones.map((option, index) => `<button class="quiz-option" onclick="Educacion.responderQuiz(${id},${index},${extra.quiz.correcta},this)">${option}</button>`).join('')}</div><small id="edu-quiz-result"></small></div>
+                                <div class="article-box"><h4>Avance guardado</h4><div class="learning-progress"><span id="article-progress-bar" style="width:${Number(progress.progreso_porcentaje || 25)}%"></span></div><p id="article-progress-label">${Number(progress.progreso_porcentaje || 25)}% completado</p></div>
+                            </aside>
                         </div>
-                        ${a.url_externa ? `<div style="margin-top:16px;"><a href="${a.url_externa}" target="_blank" class="btn btn-outline">🔗 Leer más</a></div>` : ''}
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" onclick="Utils.cerrarModal('modal-articulo')">Cerrar</button>
-                    </div>
-                </div>
-            `;
+                    <div class="modal-footer"><button class="btn btn-outline" onclick="Educacion.cerrarArticulo()">Continuar luego</button><button class="btn btn-primary" onclick="Educacion.completarArticulo(${id})">✓ Marcar como completada</button></div>
+                </div>`;
             document.body.appendChild(overlay);
-        } catch (err) { Utils.toast('❌ Error: ' + err.message, 'error'); }
+            document.addEventListener('keydown', this.escapeHandler);
+        } catch (error) { Utils.toast(`❌ ${error.message}`, 'error'); }
     },
 
-    categoriaFiltro: '',
-    filtrar(categoria) {
-        this.categoriaFiltro = categoria;
-        App.cargarPagina('educacion');
+    escapeHandler(event) { if (event.key === 'Escape') Educacion.cerrarArticulo(); },
+    cerrarArticulo() {
+        document.getElementById('modal-articulo')?.remove();
+        document.removeEventListener('keydown', this.escapeHandler);
+        this.cargar(this.container);
     },
 
-    calcularValor() {
-        const sca = parseFloat(document.getElementById('edu-sca')?.value) || 0;
-        const precioRef = parseFloat(document.getElementById('edu-precio-ref')?.value) || 8.47;
-        const qq = parseFloat(document.getElementById('edu-qq')?.value) || 0;
-        const container = document.getElementById('edu-resultado');
-        if (!container || !qq) { Utils.toast('⚠️ Ingresa una cantidad.', 'error'); return; }
-
-        const factorSCA = sca >= 90 ? 2.0 : sca >= 85 ? 1.5 : sca >= 80 ? 1.2 : sca >= 75 ? 1.0 : 0.85;
-        const precioFinal = precioRef * factorSCA;
-        const valorUSD = precioFinal * qq * 46;
-        const valorHNL = valorUSD * 26;
-
-        container.innerHTML = `
-            <div class="card" style="border-left:4px solid var(--verde-hoja);">
-                <div class="card-body" style="padding:16px;">
-                    <h4 style="margin:0 0 12px;color:var(--cafe-800);">💰 Resultado</h4>
-                    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-                        <div style="text-align:center;">
-                            <div style="font-size:0.7rem;color:var(--cafe-400);text-transform:uppercase;">Precio por kg</div>
-                            <div style="font-size:1.3rem;font-weight:700;color:#2E7D32;">$${precioFinal.toFixed(2)}</div>
-                            <div style="font-size:0.75rem;color:var(--cafe-400);">(ref: $${precioRef}) × ${factorSCA.toFixed(2)} (SCA ${sca})</div>
-                        </div>
-                        <div style="text-align:center;">
-                            <div style="font-size:0.7rem;color:var(--cafe-400);text-transform:uppercase;">Valor Total USD</div>
-                            <div style="font-size:1.3rem;font-weight:700;color:#1565C0;">$${Utils.numero(valorUSD, 0)}</div>
-                        </div>
-                        <div style="text-align:center;">
-                            <div style="font-size:0.7rem;color:var(--cafe-400);text-transform:uppercase;">Valor Total HNL</div>
-                            <div style="font-size:1.3rem;font-weight:700;color:#E65100;">${Utils.moneda(valorHNL)}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+    async actualizarProgreso(id) {
+        const boxes = [...document.querySelectorAll('[data-edu-check]')];
+        const checked = boxes.filter(box => box.checked).length;
+        const percent = Math.min(90, 25 + Math.round((checked / Math.max(1, boxes.length)) * 55));
+        await window.api.educacion.saveProgress({ articulo_id: id, progreso_porcentaje: percent, estado: 'iniciado' });
+        const bar = document.getElementById('article-progress-bar');
+        const label = document.getElementById('article-progress-label');
+        if (bar) bar.style.width = `${percent}%`;
+        if (label) label.textContent = `${percent}% completado`;
     },
 
-    // ─── Guías de Preparación ───
-    mostrarGuia(tipo) {
-        const guias = {
-            chemex: { nombre: '🧪 Chemex', ratio: '1:15', temp: '92-96°C', tiempo: '4 min', molienda: 'Media-gruesa (similar a sal de mar)', pasos: [
-                '1. Calienta agua a 92-96°C',
-                '2. Coloca el filtro de papel y enjuágalo con agua caliente',
-                '3. Agrega 30g de café molido medio-grueso',
-                '4. Vierte 60g de agua y espera 30 segundos (bloom)',
-                '5. Vierte el resto del agua (450g total) en movimientos circulares',
-                '6. Deja drenar (total ~4 minutos)',
-                '7. Retira el filtro y sirve'
-            ]},
-            v60: { nombre: '🍶 V60', ratio: '1:16', temp: '90-96°C', tiempo: '2:30-3:00 min', molienda: 'Media (similar a azúcar morena)', pasos: [
-                '1. Calienta agua a 90-96°C',
-                '2. Coloca el filtro y enjuágalo',
-                '3. Agrega 20g de café molido medio',
-                '4. Vierte 40g de agua, espera 30 segundos',
-                '5. Vierte hasta 150g en círculos, espera a que baje',
-                '6. Vierte hasta 320g total',
-                '7. Deja drenar (total ~3 min)'
-            ]},
-            francesa: { nombre: '☕ Francesa', ratio: '1:15', temp: '93-96°C', tiempo: '4 min', molienda: 'Gruesa (como pan molido)', pasos: [
-                '1. Calienta agua a 93-96°C',
-                '2. Agrega 30g de café molido grueso',
-                '3. Vierte 450g de agua',
-                '4. Remueve suavemente con una cuchara',
-                '5. Coloca la tapa y espera 4 minutos',
-                '6. Presiona el émbolo lentamente',
-                '7. Sirve inmediatamente'
-            ]},
-            espresso: { nombre: '⚡ Espresso', ratio: '1:2', temp: '90-96°C', tiempo: '25-30 seg', molienda: 'Fina (como harina)', pasos: [
-                '1. Precalienta la máquina',
-                '2. Muele 18g de café finamente',
-                '3. Distribuye y apisona uniformemente',
-                '4. Extrae 36g en 25-30 segundos',
-                '5. La crema debe ser color avellana',
-                '6. Sirve inmediatamente'
-            ]},
-            'cold-brew': { nombre: '🧊 Cold Brew', ratio: '1:8', temp: 'Fría (ambiente)', tiempo: '12-24 horas', molienda: 'Extra gruesa', pasos: [
-                '1. Muele 100g de café extra grueso',
-                '2. Mezcla con 800ml de agua filtrada',
-                '3. Cubre y deja reposar 12-24 horas a temperatura ambiente o refrigerado',
-                '4. Filtra con filtro de papel o tela',
-                '5. Sirve sobre hielo',
-                '6. Se conserva hasta 2 semanas en refrigeración'
-            ]}
-        };
-        const g = guias[tipo];
-        if (!g) return;
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay active';
-        overlay.id = 'modal-guia';
-        overlay.innerHTML = `
-            <div class="modal-content" style="max-width:550px;">
-                <div class="modal-header">
-                    <h3>${g.nombre}</h3>
-                    <button class="modal-close" onclick="Utils.cerrarModal('modal-guia')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
-                        <div style="text-align:center;"><div style="font-size:0.65rem;color:var(--cafe-400);">Proporción</div><div style="font-weight:700;">${g.ratio}</div></div>
-                        <div style="text-align:center;"><div style="font-size:0.65rem;color:var(--cafe-400);">Temperatura</div><div style="font-weight:700;">${g.temp}</div></div>
-                        <div style="text-align:center;"><div style="font-size:0.65rem;color:var(--cafe-400);">Tiempo</div><div style="font-weight:700;">${g.tiempo}</div></div>
-                        <div style="text-align:center;"><div style="font-size:0.65rem;color:var(--cafe-400);">Molienda</div><div style="font-weight:700;font-size:0.8rem;">${g.molienda}</div></div>
-                    </div>
-                    <ol style="margin:0;padding-left:20px;line-height:2;">
-                        ${g.pasos.map(p => `<li style="color:var(--cafe-700);">${p}</li>`).join('')}
-                    </ol>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="Utils.cerrarModal('modal-guia')">Cerrar</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
+    async responderQuiz(articleId, answer, correct, button) {
+        const options = [...button.parentElement.querySelectorAll('.quiz-option')];
+        options.forEach((option, index) => {
+            option.disabled = true;
+            if (index === correct) option.classList.add('correct');
+            else if (index === answer) option.classList.add('incorrect');
+        });
+        const passed = answer === correct;
+        const result = document.getElementById('edu-quiz-result');
+        if (result) result.textContent = passed ? '✅ Correcto. Ya puede relacionar el concepto con la operación.' : 'Revise la respuesta señalada y vuelva a aplicar el concepto en un caso real.';
+        await window.api.educacion.saveQuiz({ articulo_id: articleId, puntaje: passed ? 1 : 0, total: 1, respuestas: { respuesta: answer, correcta: correct } });
+        if (passed) await window.api.educacion.saveProgress({ articulo_id: articleId, progreso_porcentaje: 90, estado: 'iniciado' });
+    },
+
+    async completarArticulo(id) {
+        await window.api.educacion.saveProgress({ articulo_id: id, progreso_porcentaje: 100, estado: 'completado' });
+        Utils.toast('✅ Lección completada y guardada en tu avance.');
+        this.cerrarArticulo();
     }
 };
 

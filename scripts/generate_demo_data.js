@@ -381,6 +381,26 @@ async function generarDemo(years) {
     console.log('🏠  Creando finca...');
     insertar('finca', FINCA_DEMO);
     ejecutarScriptSQL(DEMO_SEEDS_PATH);
+    const reportConfig = {
+        reporte_nombre_organizacion: FINCA_DEMO.nombre,
+        reporte_identificacion: 'DEMO-HN-CAFE-001',
+        reporte_direccion: FINCA_DEMO.ubicacion,
+        reporte_telefono: '+504 0000-0000 (DEMO)',
+        reporte_email: 'demo@cafetal-os.example',
+        reporte_sitio_web: 'cafetal-os.example',
+        reporte_responsable: 'Administrador de demostración',
+        reporte_pie: 'Documento demostrativo generado localmente por Cafetal OS. Datos ficticios.',
+        clima_proveedor: 'open-meteo',
+        clima_geocodificador: 'open-meteo',
+        clima_cache_ttl_minutos: '30',
+        clima_latitud: '14.9167',
+        clima_longitud: '-88.2333',
+        clima_ubicacion_nombre: 'Santa Bárbara, Honduras',
+        clima_zona_horaria: 'America/Tegucigalpa'
+    };
+    for (const [key, value] of Object.entries(reportConfig)) {
+        db.run('UPDATE configuracion SET valor = ? WHERE clave = ?', [value, key]);
+    }
 
     // ── Paso 4: Lotes ──────────────────────────────────────────────────────
     console.log('🌳  Creando lotes...');
@@ -621,18 +641,41 @@ async function generarDemo(years) {
         const qqVenta = parseFloat((entrada.cantidad_qq * porcentajeVenta).toFixed(2));
         const precioVenta = random.int(1800, 3200); // L/qq según calidad
 
-        insertar('inventario', {
+        const clienteVenta = random.pick(COMPRADORES);
+        const fechaVentaTexto = fechaVenta.toISOString().split('T')[0];
+        const facturaVenta = `FACT-${String(random.int(1000, 9999))}`;
+        const totalVenta = parseFloat((qqVenta * precioVenta).toFixed(2));
+        const movimientoVentaId = insertar('inventario', {
             tipo_producto: 'pergamino_seco',
             lote_id: entrada.lote_id,
             tipo_movimiento: 'venta',
             cantidad_qq: qqVenta,
             cantidad_kg: parseFloat((qqVenta * KG_PER_QQ).toFixed(1)),
-            fecha_movimiento: fechaVenta.toISOString().split('T')[0],
-            cliente_destino: random.pick(COMPRADORES),
+            fecha_movimiento: fechaVentaTexto,
+            cliente_destino: clienteVenta,
             precio_venta_qq: precioVenta,
-            total_venta: parseFloat((qqVenta * precioVenta).toFixed(2)),
-            factura: `FACT-${String(random.int(1000, 9999))}`,
+            total_venta: totalVenta,
+            factura: facturaVenta,
             observaciones: `Venta de café pergamino seco - lote ${entrada.lote_id}`
+        });
+        insertar('ventas_cafe', {
+            codigo: `VTA-DEMO-${String(totalVentas + 1).padStart(5, '0')}`,
+            fecha: fechaVentaTexto,
+            cliente: clienteVenta,
+            identificacion_cliente: `RTN-DEMO-${String(totalVentas + 1).padStart(4, '0')}`,
+            tipo_producto: 'pergamino_seco',
+            lote_id: entrada.lote_id,
+            cantidad_kg: parseFloat((qqVenta * KG_PER_QQ).toFixed(1)),
+            cantidad_qq: qqVenta,
+            precio_por_kg: parseFloat((precioVenta / KG_PER_QQ).toFixed(4)),
+            precio_por_qq: precioVenta,
+            total_venta: totalVenta,
+            factura: facturaVenta,
+            destino: random.pick(['San Pedro Sula','Tegucigalpa','Puerto Cortés','La Ceiba','Copán Ruinas']),
+            condicion_entrega: random.pick(['Retiro en bodega','Entregado en destino','Puesto en beneficio']),
+            observaciones: 'Venta demostrativa vinculada al inventario.',
+            inventario_id: movimientoVentaId,
+            estado: 'confirmada'
         });
         totalVentas++;
     }
@@ -655,7 +698,7 @@ async function generarDemo(years) {
         });
     }
 
-    const totalInventario = totalEntradas + totalVentas;
+    let totalInventario = totalEntradas + totalVentas;
     console.log(`  → ${totalInventario} movimientos de inventario`);
     console.log(`  → ${totalVentas} ventas registradas\n`);
 
@@ -919,7 +962,8 @@ async function generarDemo(years) {
         totalComplementarios++;
     }
 
-    // Clima: 365 días de historia y alertas relacionadas con la finca.
+    // Clima: 365 días de historia, lectura API demo y alertas relacionadas con la finca.
+    const climateDemoDays = [];
     for (let day = 364; day >= 0; day--) {
         const fecha = shiftDays(range.end, -day);
         const month = fecha.getMonth();
@@ -927,18 +971,66 @@ async function generarDemo(years) {
         const rain = rainySeason
             ? Math.max(0, random.float(0, 34) - (Math.random() < 0.25 ? 12 : 0))
             : Math.max(0, random.float(0, 9) - (Math.random() < 0.65 ? 8 : 0));
-        insertar('registros_clima', {
+        const tempMax = random.float(23.5, 30.8, 1);
+        const tempMin = random.float(13.2, 19.6, 1);
+        const tempCurrent = parseFloat(((tempMax + tempMin) / 2 + random.float(-1.2, 1.2)).toFixed(1));
+        const humidity = random.float(rainySeason ? 72 : 58, rainySeason ? 96 : 82, 1);
+        const wind = random.float(1.2, 13.5, 1);
+        const pressure = random.float(846, 870, 1);
+        const weatherCode = rain > 15 ? 63 : rain > 1 ? 61 : humidity > 88 ? 45 : 2;
+        const row = {
             fecha: isoDate(fecha),
             precipitacion_mm: parseFloat(rain.toFixed(1)),
-            temp_max: random.float(23.5, 30.8, 1),
-            temp_min: random.float(13.2, 19.6, 1),
-            humedad_relativa: random.float(rainySeason ? 72 : 58, rainySeason ? 96 : 82, 1),
-            velocidad_viento: random.float(1.2, 13.5, 1),
-            fuente: day < 30 ? 'estación local' : 'registro histórico demo',
+            temp_actual: tempCurrent,
+            sensacion_termica: parseFloat((tempCurrent + (humidity > 80 ? 0.8 : -0.3)).toFixed(1)),
+            presion_superficie_hpa: pressure,
+            temp_max: tempMax,
+            temp_min: tempMin,
+            humedad_relativa: humidity,
+            velocidad_viento: wind,
+            codigo_clima: weatherCode,
+            latitud: 14.9167,
+            longitud: -88.2333,
+            ubicacion_nombre: 'Santa Bárbara, Honduras',
+            zona_horaria: 'America/Tegucigalpa',
+            consultado_en: `${isoDate(fecha)}T12:00:00-06:00`,
+            fuente: day < 30 ? 'open-meteo demo' : 'registro histórico demo',
             notas: rain > 25 ? 'Lluvia fuerte; revisar drenajes y acceso a lotes.' : ''
-        });
+        };
+        insertar('registros_clima', row);
+        climateDemoDays.push(row);
         totalComplementarios++;
     }
+
+    const recentClimate = climateDemoDays.slice(-7);
+    const currentClimate = recentClimate[recentClimate.length - 1];
+    const climateCachePayload = {
+        provider: 'Open-Meteo', latitude: 14.9167, longitude: -88.2333, elevation: 1420,
+        timezone: 'America/Tegucigalpa', timezoneAbbreviation: 'CST', locationName: 'Santa Bárbara, Honduras',
+        fetchedAt: `${currentClimate.fecha}T12:00:00.000Z`,
+        current: {
+            time: `${currentClimate.fecha}T12:00`, temperature: currentClimate.temp_actual,
+            relativeHumidity: currentClimate.humedad_relativa, surfacePressure: currentClimate.presion_superficie_hpa,
+            apparentTemperature: currentClimate.sensacion_termica, precipitation: currentClimate.precipitacion_mm,
+            rain: currentClimate.precipitacion_mm, weatherCode: currentClimate.codigo_clima,
+            weatherLabel: currentClimate.codigo_clima === 63 ? 'Lluvia moderada' : currentClimate.codigo_clima === 61 ? 'Lluvia ligera' : currentClimate.codigo_clima === 45 ? 'Niebla' : 'Parcialmente nublado',
+            windSpeed: currentClimate.velocidad_viento, windDirection: 110,
+            units: { temperature: '°C', relativeHumidity: '%', surfacePressure: 'hPa', precipitation: 'mm', windSpeed: 'km/h' }
+        },
+        daily: recentClimate.map(item => ({
+            date: item.fecha, temperatureMax: item.temp_max, temperatureMin: item.temp_min,
+            precipitationSum: item.precipitacion_mm, precipitationProbability: Math.min(95, Math.round(item.humedad_relativa)),
+            weatherCode: item.codigo_clima, weatherLabel: item.codigo_clima === 63 ? 'Lluvia moderada' : item.codigo_clima === 61 ? 'Lluvia ligera' : item.codigo_clima === 45 ? 'Niebla' : 'Parcialmente nublado',
+            windSpeedMax: item.velocidad_viento
+        })),
+        extractionAlerts: currentClimate.humedad_relativa > 70
+            ? [{ code: 'humidity-high', level: 'danger', title: 'Humedad ambiental alta', message: 'La humedad supera 70%. Para extracción de espresso, ensanche ligeramente la molienda y verifique nuevamente el tiempo de extracción antes de fijar el ajuste.' }]
+            : [{ code: 'humidity-stable', level: 'success', title: 'Humedad ambiental estable', message: 'Mantenga la receta y confirme el resultado en taza antes de cambiar la molienda.' }]
+    };
+    insertar('clima_api_cache', {
+        cache_key: '14.9167,-88.2333', proveedor: 'Open-Meteo', payload_json: JSON.stringify(climateCachePayload),
+        fetched_at: climateCachePayload.fetchedAt, updated_at: climateCachePayload.fetchedAt
+    });
 
     const alertas = [
         ['roya', 'medio', -42, 20, 'Realizar muestreo por lote, manejo de sombra y control preventivo según asistencia técnica.'],
@@ -958,6 +1050,112 @@ async function generarDemo(years) {
         });
         totalComplementarios++;
     }
+
+
+    // Planillas de corte: captura semanal tipo matriz para cuadrillas.
+    const harvestYear = range.end.getMonth() >= 8 ? range.end.getFullYear() : range.end.getFullYear() - 1;
+    const seasonStart = new Date(harvestYear, 9, 1);
+    const seasonEnd = new Date(harvestYear + 1, 2, 31);
+    const temporadaId = insertar('temporadas_cafe', {
+        nombre: `Cosecha ${harvestYear}-${harvestYear + 1}`,
+        fecha_inicio: isoDate(seasonStart), fecha_fin: isoDate(seasonEnd), estado: 'activa',
+        precio_unidad_default: 42, unidad_default: 'lata', peso_lata_kg: 18,
+        observaciones: 'Temporada demostrativa con planillas semanales por cuadrilla.'
+    });
+    totalComplementarios++;
+
+    const monday = new Date(range.end);
+    const mondayOffset = (monday.getDay() + 6) % 7;
+    monday.setDate(monday.getDate() - mondayOffset - 7);
+    monday.setHours(0, 0, 0, 0);
+    for (const loteId of loteIds.slice(0, 3)) {
+        const weekEnd = shiftDays(monday, 4);
+        const planillaId = insertar('planillas_corte', {
+            temporada_id: temporadaId, lote_id: loteId, semana_inicio: isoDate(monday), semana_fin: isoDate(weekEnd),
+            unidad: 'lata', precio_por_unidad: 42, peso_lata_kg: 18, dias_semana: 5,
+            estado: 'pagada', observaciones: 'Planilla demostrativa de lunes a viernes.'
+        });
+        totalComplementarios++;
+        for (const recolectorId of recolectorIds.slice(0, 12)) {
+            for (let day = 0; day < 5; day++) {
+                const quantity = random.float(2.5, 9.5, 1);
+                insertar('recoleccion', {
+                    lote_id: loteId, fecha: isoDate(shiftDays(monday, day)), recolector_id: recolectorId,
+                    latas_recolectadas: quantity, kilos_estimados: parseFloat((quantity * 18).toFixed(2)),
+                    peso_lata_kg: 18, tipo_madurez: random.pick(['maduro','maduro','maduro','pinton']),
+                    precio_por_lata: 42, total_pagado: parseFloat((quantity * 42).toFixed(2)),
+                    hora_inicio: '06:00', hora_fin: '15:30', observaciones: 'Registro generado desde planilla semanal demo.',
+                    planilla_id: planillaId, unidad_corte: 'lata', cantidad_unidad: quantity
+                });
+                totalCosechas++;
+            }
+        }
+    }
+
+    // Acopio y compras: operación para beneficiadores que transforman café de terceros.
+    const proveedoresCafe = [
+        ['PRV-DEMO-001','Productores Unidos de El Níspero','cooperativa','Santa Bárbara','Comercio Justo'],
+        ['PRV-DEMO-002','Finca La Esperanza','productor','Peña Blanca, Cortés','Café de altura'],
+        ['PRV-DEMO-003','Beneficio Comunitario Los Pinos','beneficio','La Campa, Lempira',''],
+        ['PRV-DEMO-004','Asociación Mujeres del Café','cooperativa','Copán Ruinas, Copán','Orgánico'],
+        ['PRV-DEMO-005','Juan Antonio Mejía','productor','Atima, Santa Bárbara','']
+    ];
+    const proveedorCafeIds = [];
+    for (const [codigo,nombre,tipo,ubicacion,certificaciones] of proveedoresCafe) {
+        proveedorCafeIds.push(insertar('proveedores_cafe', {
+            codigo, nombre, tipo, identificacion: `DEMO-${codigo.slice(-3)}`, telefono: '0000-0000',
+            email: `${codigo.toLowerCase()}@example.com`, ubicacion, certificaciones, activo: 1
+        }));
+        totalComplementarios++;
+    }
+
+    const comprasDemo = [
+        ['cereza', 2250, 13.8, null, 'aprobado', 'Lote externo CE-18'],
+        ['pergamino_humedo', 920, 47.5, 35.0, 'condicionado', 'Recepción para secado controlado'],
+        ['pergamino_seco', 1380, 78.0, 11.2, 'aprobado', 'Compra por peso y muestra física'],
+        ['verde', 690, 108.0, 10.8, 'aprobado', 'Café verde clasificado'],
+        ['pergamino_seco', 460, 72.0, 15.8, 'rechazado', 'Humedad fuera de especificación demo']
+    ];
+    for (let index = 0; index < comprasDemo.length; index++) {
+        const [tipoProducto, kg, priceKg, humidity, status, notes] = comprasDemo[index];
+        const quantityQq = parseFloat((kg / KG_PER_QQ).toFixed(4));
+        const purchaseId = insertar('compras_cafe', {
+            codigo: `CMP-DEMO-${String(index + 1).padStart(4,'0')}`,
+            proveedor_id: proveedorCafeIds[index % proveedorCafeIds.length],
+            fecha: isoDate(shiftDays(range.end, -(index * 8 + 3))),
+            temporada: `Cosecha ${harvestYear}-${harvestYear + 1}`, tipo_producto: tipoProducto,
+            cantidad_kg: kg, cantidad_qq: quantityQq, precio_por_kg: priceKg,
+            precio_por_qq: parseFloat((priceKg * KG_PER_QQ).toFixed(2)), costo_total: parseFloat((kg * priceKg).toFixed(2)),
+            humedad_porcentaje: humidity, defectos_porcentaje: random.float(1.2, 7.5, 1),
+            variedad: random.pick(['Catuaí','Lempira','IHCAFE 90','Parainema']), origen_geografico: proveedoresCafe[index % proveedoresCafe.length][3],
+            finca_origen: proveedoresCafe[index % proveedoresCafe.length][1], lote_proveedor: `EXT-${index + 1}`,
+            factura_comprobante: `FAC-DEMO-${100 + index}`, estado_calidad: status,
+            ubicacion_recepcion: 'Bodega de acopio principal', observaciones: notes
+        });
+        totalComplementarios++;
+        if (status === 'aprobado' || status === 'condicionado') {
+            const inventoryId = insertar('inventario', {
+                tipo_producto: tipoProducto, lote_id: null, beneficio_id: null, tipo_movimiento: 'entrada',
+                cantidad_qq: quantityQq, cantidad_kg: kg, fecha_movimiento: isoDate(shiftDays(range.end, -(index * 8 + 3))),
+                ubicacion: 'Bodega de acopio principal', cliente_destino: null, precio_venta_qq: null, total_venta: null,
+                factura: `FAC-DEMO-${100 + index}`, observaciones: `Ingreso por compra ${purchaseId}.`, compra_id: purchaseId,
+                costo_origen: parseFloat((kg * priceKg).toFixed(2))
+            });
+            ejecutarSQL(`UPDATE compras_cafe SET inventario_id = ${Number(inventoryId)} WHERE id = ${Number(purchaseId)}`);
+            totalInventario++;
+        }
+    }
+
+    // Progreso educativo de ejemplo para mostrar una experiencia activa.
+    const firstArticles = consultar('SELECT id FROM articulos ORDER BY id LIMIT 3');
+    firstArticles.forEach((article, index) => {
+        insertar('progreso_educacion', {
+            usuario_id: 1, articulo_id: article.id, estado: index === 0 ? 'completado' : 'iniciado',
+            progreso_porcentaje: index === 0 ? 100 : 25 + index * 20,
+            ultima_lectura: `${range.endStr} 10:00:00`
+        });
+        totalComplementarios++;
+    });
 
     console.log(`  → ${totalComplementarios} registros complementarios generados\n`);
 

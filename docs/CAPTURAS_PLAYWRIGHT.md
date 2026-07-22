@@ -1,135 +1,119 @@
-# Capturas automatizadas con Playwright
+# Capturas de pantalla con Playwright
 
-Cafetal OS genera una galería reproducible de la aplicación Electron real usando la base demo. La automatización no sustituye el preload ni simula la base de datos: inicia el bundle compilado, autentica un usuario y recorre los módulos por la misma interfaz pública que utiliza la aplicación.
+La galería visual documenta el estado real de Cafetal OS usando la base demo. Se genera automáticamente en escritorio y móvil.
 
-## Comandos
+## Ejecutar
 
-```bash
-npm run screenshots
-```
-
-Alias en español:
-
-```bash
-npm run capturas
-```
-
-En Windows:
+Windows:
 
 ```bat
 capturar-pantallas.bat
 ```
 
-Para abrir Playwright en modo de depuración:
+Terminal:
+
+```bash
+npm run screenshots
+```
+
+Depuración:
 
 ```bash
 npm run screenshots:debug
 ```
 
-## Flujo automatizado
+No use `npx run screenshots`.
 
-1. Regenera `database/cafetal-os-demo.db`.
-2. Compila main, preload y renderer.
-3. Verifica que `AuthStore` esté integrado en `out/main/index.js`.
-4. Verifica `node_modules/electron/path.txt` y el ejecutable real de Electron.
-5. Elimina el perfil temporal de capturas.
-6. Inicia Electron desde la raíz del proyecto con `--demo --reset-demo`.
-7. Captura el inicio de sesión.
-8. Inicia sesión con `admin` / `admin`.
-9. Recorre los módulos y las pestañas de Configuración.
-10. Repite la galería en tamaño móvil.
-11. Cierra Electron y conserva trazas cuando ocurre un error.
+## Proceso
 
-## Salidas
+1. limpia resultados temporales;
+2. regenera la demo;
+3. compila main, preload y renderer;
+4. verifica el bundle y Electron;
+5. abre un perfil temporal;
+6. captura login;
+7. inicia sesión con `admin` / `admin`;
+8. recorre módulos;
+9. captura configuración y diálogos operativos;
+10. repite a 430 × 900.
 
-```text
-IMG/desktop/  capturas de 1600 × 1000
-IMG/mobile/   capturas de 430 × 900
-```
+## Resoluciones
 
-Las imágenes representan el viewport completo de la aplicación. El contenido de cada módulo comienza desde la parte superior. En pantallas móviles, las tablas se representan como tarjetas cuando corresponde.
+- Desktop: `1600 × 1000`.
+- Móvil: `430 × 900`.
 
-## Por qué ocurría `firstWindow: Timeout 30000ms`
+## Archivos principales
 
-`electronApplication.firstWindow()` espera que el proceso principal cree una `BrowserWindow`. Si el proceso principal termina antes —por ejemplo, porque el bundle conserva un `require('./auth-store')` hacia un archivo que no fue generado— Playwright solo observa que nunca apareció una ventana y finalmente informa un timeout.
+| Archivo | Interfaz |
+|---|---|
+| `00-inicio-sesion.png` | Acceso local. |
+| `01-resumen.png` | Dashboard. |
+| `02-mi-finca.png` | Finca. |
+| `03-lotes.png` | Parcelas. |
+| `04-cosecha.png` | Corte y cuadrillas. |
+| `05-compras-cafe.png` | Compras y acopio. |
+| `06-beneficio.png` | Transformación. |
+| `07-inventario.png` | Existencias. |
+| `08-gastos.png` | Costos. |
+| `09-reportes.png` | Informes. |
+| `10-sostenibilidad.png` | Prácticas y huella. |
+| `11-calidad.png` | Catación. |
+| `12-trazabilidad.png` | Origen. |
+| `13-predictivo.png` | Indicadores orientativos. |
+| `14-mercado.png` | Precios. |
+| `15-clima.png` | Clima y alertas. |
+| `16-marketing.png` | Clientes y campañas. |
+| `17-perfiles-cafe.png` | Perfiles sensoriales. |
+| `18-educacion.png` | Centro interactivo. |
+| `19-ayuda.png` | Ayuda responsive. |
+| `20-configuracion-datos.png` | Base y demo. |
+| `21-configuracion-operacion.png` | Perfil operativo. |
+| `22-configuracion-membrete.png` | Identidad PDF. |
+| `23-configuracion-mcp.png` | IA local. |
+| `24-configuracion-cuenta.png` | Cuenta. |
+| `25-configuracion-usuarios.png` | Usuarios. |
+| `26-configuracion-proyecto.png` | Proyecto abierto. |
+| `27-planilla-semanal.png` | Matriz por cortador/día. |
+| `27-registro-masivo-lotes.png` | Carga de parcelas. |
+| `27-registro-masivo-compras.png` | Recepciones por filas. |
 
-La versión 2.2 corrige este diagnóstico de tres maneras:
+Móvil agrega `00-menu-lateral.png`.
 
-- `scripts/verify-bundle.js` impide compilar un bundle con el módulo de autenticación faltante;
-- `scripts/check-electron.js` valida el ejecutable y las entradas compiladas antes de iniciar Playwright;
-- `tests/e2e/helpers/electron-app.js` compite entre la primera ventana y la terminación del proceso, adjuntando `stdout` y `stderr` al error.
+## Esperas visuales
 
-Ahora, si Electron termina antes de abrir la ventana, el mensaje debe mostrar la causa del proceso principal en vez de limitarse a un timeout genérico.
+La prueba espera:
 
-## Diferencia entre `npm` y `npx`
+- fuentes listas;
+- imágenes completas;
+- contenido del módulo cargado;
+- atributos `data-page` y `aria-label` correctos;
+- animaciones desactivadas;
+- scroll al inicio.
 
-El comando correcto es:
+## Errores frecuentes
 
-```bash
-npm run screenshots
-```
+### `firstWindow` excede el tiempo
 
-No use:
+Electron terminó antes de crear la ventana. Revise la salida capturada, `out/main/index.js`, el binario de Electron y el perfil temporal.
 
-```bash
-npx run screenshots
-```
+### Selector ambiguo
 
-`npx run` puede ejecutar un paquete distinto llamado `run`. Eso produce salidas como:
+Use nombres accesibles exactos o selectores estables. No anide botones con nombres que contengan la etiqueta de un campo.
 
-```text
-Watching ...
-Starting: screenshots
-Cannot find module .../screenshots
-```
+### Un elemento intercepta el clic
 
-Tampoco use `node screenshots`, porque `screenshots` es un script de npm, no un archivo JavaScript.
+Revise geometría, z-index y área interactiva. No use `force: true` como solución por defecto; puede ocultar un error real de interfaz.
 
-## Diagnóstico en Windows
+### Galería desactualizada
 
-Compruebe Electron:
+El script elimina `IMG/desktop` e `IMG/mobile`, pero conserva `IMG/referencias`.
 
-```bat
-node scripts\check-electron.js
-```
+## Uso en pull requests
 
-Si falta el ejecutable:
+Cuando cambie una interfaz:
 
-```bat
-npx install-electron --no
-```
-
-Limpieza recomendada cuando se mezclaron versiones:
-
-```bat
-rmdir /s /q node_modules
-rmdir /s /q out
-rmdir /s /q test-results
-rmdir /s /q playwright-report
-npm ci
-npx install-electron --no
-npm run screenshots
-```
-
-Descomprima cada versión en una carpeta nueva. No copie una versión reciente encima de una carpeta `AppCafeHonduras-Vue3-2.0.0`, porque pueden quedar bundles o dependencias antiguas.
-
-## Archivos de diagnóstico
-
-```text
-test-results/
-playwright-report/
-.tmp/screenshots-user-data/
-```
-
-Cuando reporte un problema, incluya:
-
-- sistema operativo;
-- `node --version`;
-- `npm --version`;
-- salida completa de `node scripts/check-electron.js`;
-- salida completa de `npm run screenshots`;
-- `error-context.md` y la traza generada.
-
-## Integración con documentación
-
-`IMG/README.md` describe cada pantalla. Un pull request que cambie de forma deliberada la interfaz debe regenerar la galería y confirmar las imágenes modificadas.
+1. regenere las capturas;
+2. incluya imágenes relevantes antes/después;
+3. confirme desktop y móvil;
+4. no incluya datos productivos;
+5. revise que texto y controles no queden cortados.
