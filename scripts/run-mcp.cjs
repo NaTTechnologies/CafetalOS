@@ -12,7 +12,7 @@ if (!fs.existsSync(entry)) {
 }
 
 let electron
-try { electron = require('electron') } catch (_error) {
+try { electron = require('electron') } catch {
   process.stderr.write('[Cafetal OS MCP] Electron no está instalado. Ejecute npm ci y npx install-electron --no.\n')
   process.exit(1)
 }

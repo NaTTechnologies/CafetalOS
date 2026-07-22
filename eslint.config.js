@@ -10,7 +10,8 @@ const browserGlobals = {
 const nodeGlobals = {
   process: 'readonly', Buffer: 'readonly', __dirname: 'readonly', __filename: 'readonly',
   require: 'readonly', module: 'readonly', exports: 'readonly', console: 'readonly',
-  setTimeout: 'readonly', clearTimeout: 'readonly', global: 'readonly'
+  setTimeout: 'readonly', clearTimeout: 'readonly', global: 'readonly',
+  URL: 'readonly', AbortController: 'readonly'
 }
 
 module.exports = [
