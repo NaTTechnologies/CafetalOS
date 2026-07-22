@@ -67,10 +67,10 @@ jobs:
           NODE
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm ci --force
 
       - name: Descargar binario de Electron
-        run: npx install-electron --no
+        run: npx --yes install-electron --no
 
       - name: Compilar instaladores
         run: npm run ${{ matrix.command }}
