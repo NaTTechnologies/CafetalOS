@@ -24,6 +24,9 @@ const Utils = {
         return new Date().toISOString().split('T')[0];
     },
 
+    // Alias: Utils.fecha usado por clima.js y registro-masivo.js
+    fecha(fechaStr) { return this.formatearFecha(fechaStr); },
+
     // Formatear fecha para mostrar
     formatearFecha(fecha) {
         if (!fecha) return '';
